@@ -72,9 +72,9 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setAllowContentAccess(true);
         s.setLoadsImagesAutomatically(true);
-        s.setUseWideViewPort(false);
-        s.setLoadWithOverviewMode(false);
-        web.setInitialScale(100);
+        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(true);
+        web.setInitialScale(0);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
@@ -85,7 +85,7 @@ public class MainActivity extends Activity {
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
         s.setGeolocationEnabled(true);
-        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/2.1");
+        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/2.2");
 
         WebView.setWebContentsDebuggingEnabled(false);
 
@@ -131,7 +131,7 @@ public class MainActivity extends Activity {
                     android.content.Intent i = new android.content.Intent();
                     i.addCategory(android.content.Intent.CATEGORY_OPENABLE);
                     i.setType("*/*");
-                    startActivityForResult(android.content.Intent.createChooser(i, "Выберите файл"), REQ_FILE);
+                    startActivityForResult(android.content.Intent.createChooser(i, "Р’С‹Р±РµСЂРёС‚Рµ С„Р°Р№Р»"), REQ_FILE);
                     return true;
                 } catch (Exception e) {
                     if (filePathCallback != null) filePathCallback.onReceiveValue(null);
@@ -183,7 +183,7 @@ public class MainActivity extends Activity {
                 }
             }
             if (!audioOk) {
-                Toast.makeText(this, "Разрешение на микрофон не выдано — голосовые и звонки недоступны", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Р Р°Р·СЂРµС€РµРЅРёРµ РЅР° РјРёРєСЂРѕС„РѕРЅ РЅРµ РІС‹РґР°РЅРѕ вЂ” РіРѕР»РѕСЃРѕРІС‹Рµ Рё Р·РІРѕРЅРєРё РЅРµРґРѕСЃС‚СѓРїРЅС‹", Toast.LENGTH_LONG).show();
             }
         }
     }

@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 function Step([string]$name, [scriptblock]$block) {
     Write-Host "[$name]..."
     & $block
-    if ($LASTEXITCODE -ne 0) { throw "Шаг '$name' завершился с ошибкой (код $LASTEXITCODE)" }
+    if ($LASTEXITCODE -ne 0) { throw "Step '$name' failed with exit code $LASTEXITCODE" }
 }
 
 $SDK    = "$env:LOCALAPPDATA\Android\Sdk"
@@ -15,6 +15,9 @@ $R8JAR  = "C:\Program Files\Android\Android Studio\plugins\android\lib\r8.jar"
 $PROJ = $PSScriptRoot
 $WORK = Join-Path $env:TEMP "tg_apk_build"
 $OUT  = Join-Path $WORK "build"
+
+$VER_CODE = 4
+$VER_NAME = "2.2"
 
 if (Test-Path $WORK) { Remove-Item $WORK -Recurse -Force }
 New-Item -ItemType Directory -Path $OUT | Out-Null
@@ -28,7 +31,7 @@ Step "1/6 aapt2 compile" { & "$BT\aapt2.exe" compile --dir "$WORK\res" -o "$OUT\
 Step "2/6 aapt2 link" {
     & "$BT\aapt2.exe" link -o "$OUT\base.apk" -I "$SDKJAR" --manifest "$WORK\AndroidManifest.xml" `
         -A "$WORK\assets" --min-sdk-version 24 --target-sdk-version 34 `
-        --version-code 3 --version-name 2.1 "$OUT\res.zip"
+        --version-code $VER_CODE --version-name $VER_NAME "$OUT\res.zip"
 }
 
 New-Item -ItemType Directory -Path "$OUT\classes" | Out-Null
@@ -36,12 +39,12 @@ Step "3/6 javac" {
     & "$JDK\javac.exe" --release 8 -nowarn -encoding UTF-8 -classpath "$SDKJAR" `
         -d "$OUT\classes" (Join-Path $WORK "java\com\tailgram\app\MainActivity.java")
 }
-if (-not (Get-ChildItem "$OUT\classes" -Recurse -Filter *.class)) { throw "javac не создал ни одного класса" }
+if (-not (Get-ChildItem "$OUT\classes" -Recurse -Filter *.class)) { throw "javac produced no class files" }
 
 New-Item -ItemType Directory -Path "$OUT\dex" | Out-Null
 $cls = @(Get-ChildItem "$OUT\classes" -Recurse -Filter *.class | ForEach-Object { $_.FullName })
 Step "4/6 d8" { & "$JDK\java.exe" -cp $R8JAR com.android.tools.r8.D8 --lib $SDKJAR --min-api 24 --output "$OUT\dex" @cls }
-if (-not (Test-Path "$OUT\dex\classes.dex")) { throw "d8 не создал classes.dex" }
+if (-not (Test-Path "$OUT\dex\classes.dex")) { throw "d8 produced no classes.dex" }
 
 Step "5/6 aapt add + zipalign" {
     Push-Location "$OUT\dex"
@@ -60,16 +63,23 @@ Step "6/6 apksigner" {
 
 Remove-Item (Join-Path $PROJ "..\TailGram.apk.idsig") -Force -ErrorAction SilentlyContinue
 
-# Проверка: подпись, наличие dex и assets
+# Verify: signature + required entries inside the APK
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $chk = [System.IO.Compression.ZipFile]::OpenRead($APK)
 try {
     $names = $chk.Entries | ForEach-Object { $_.FullName }
     foreach ($need in @("classes.dex", "AndroidManifest.xml", "assets/index.html", "assets/app.js", "assets/logo.png")) {
-        if ($names -notcontains $need) { throw "В APK нет $need" }
+        if ($names -notcontains $need) { throw "APK is missing $need" }
     }
+    $html = $null
+    $e = $chk.GetEntry("assets/index.html")
+    $rd = New-Object System.IO.StreamReader($e.Open(), [System.Text.Encoding]::UTF8)
+    $html = $rd.ReadToEnd(); $rd.Close()
+    if ($html -notmatch 'width=412') { throw "APK index.html has unexpected viewport meta" }
+    if ($html -notmatch "html\.android-app \.back-btn") { throw "APK index.html is missing android single-pane CSS" }
+    if ($html -notmatch "TailGramAndroid") { throw "APK index.html is missing UA-based android detection" }
 } finally { $chk.Dispose() }
 & "$BT\apksigner.bat" verify $APK
-if ($LASTEXITCODE -ne 0) { throw "Подпись APK не прошла проверку" }
+if ($LASTEXITCODE -ne 0) { throw "APK signature verification failed" }
 
 Write-Host "OK -> $APK  ($([math]::Round((Get-Item $APK).Length/1KB)) KB)"
