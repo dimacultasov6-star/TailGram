@@ -16,8 +16,8 @@ $PROJ = $PSScriptRoot
 $WORK = Join-Path $env:TEMP "tg_apk_build"
 $OUT  = Join-Path $WORK "build"
 
-$VER_CODE = 13
-$VER_NAME = "3.1"
+$VER_CODE = 14
+$VER_NAME = "3.2"
 
 if (Test-Path $WORK) { Remove-Item $WORK -Recurse -Force }
 New-Item -ItemType Directory -Path $OUT | Out-Null

@@ -108,7 +108,7 @@ public class MainActivity extends Activity {
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
         s.setGeolocationEnabled(true);
-        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.1");
+        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.2");
 
         WebView.setWebContentsDebuggingEnabled(false);
 
@@ -377,6 +377,17 @@ public class MainActivity extends Activity {
                 public void run() {
                     Notifier.showMessage(MainActivity.this, peerId, title, body);
                     Notifier.showConnection(MainActivity.this, unread);
+                }
+            });
+        }
+
+        /** Проверка из настроек: показываем уведомление независимо от того, открыто ли приложение. */
+        @JavascriptInterface
+        public void testNotify() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Notifier.showMessage(MainActivity.this, "tg_test", "TailGram", "Тест: уведомления работают");
                 }
             });
         }

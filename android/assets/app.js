@@ -1889,6 +1889,17 @@
             } catch (e) { }
         }
 
+        /** Проверка уведомлений из настроек. */
+        testNotify() {
+            try {
+                if (!window.AndroidNative || !window.AndroidNative.testNotify) {
+                    this.showToast('Уведомления доступны только в приложении на Android');
+                    return;
+                }
+                window.AndroidNative.testNotify();
+            } catch (e) { }
+        }
+
         openChat(peerId, title) {
             this.activeChat = peerId;
             try { if (window.AndroidNative && window.AndroidNative.clearUnread) window.AndroidNative.clearUnread(); } catch (e) { }

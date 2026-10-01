@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [3.2] -- 2026-10-01
+
+### Added
+- **Android: notification self-test.** Settings now has a "
+  "Check notifications" row with a Test button that posts the same heads-up notification
+  as a real message, so it is obvious within seconds whether notifications work.
+
 ## [3.1] -- 2026-10-01
 
 ### Added
