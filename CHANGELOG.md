@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [2.6] -- 2026-10-01
+
+### Changed
+- **Android: text size back to normal** (layout width 412 px, font 16 px) -- 2.5 was too small.
+- Compact paddings, avatars, headers and buttons kept, so the UI fits the screen.
+- **In-app zoom control:** - / + buttons (72-130%) next to the build badge; the value is remembered.
+
 ## [2.5] -- 2026-10-01
 
 ###  changed

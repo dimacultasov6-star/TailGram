@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=480, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=412, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#f8f2e3">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -566,7 +566,7 @@
 
         /* ============ ANDROID: COMPACT SIZES ============
            Интерфейс сделан для ПК: на телефоне элементы не помещались. */
-        html.android-app { font-size: 15px; }
+        html.android-app { font-size: 16px; }
         html.android-app .app-header { min-height: 52px; padding: 7px 10px; gap: 6px; }
         html.android-app .avatar-view { width: 34px; height: 34px; font-size: .92rem; }
         html.android-app .profile-block { gap: 8px; }
@@ -1086,8 +1086,10 @@
         var list = root.querySelector('.view-chats');
         var dlg = root.querySelector('.view-dialog');
         if (!list || !dlg) return;
-        var vw = document.documentElement.clientWidth || window.innerWidth;
-        var vh = document.documentElement.clientHeight || window.innerHeight;
+        var z = parseFloat(document.documentElement.style.zoom || '1');
+        if (!z || z <= 0 || !isFinite(z)) z = 1;
+        var vw = (document.documentElement.clientWidth || window.innerWidth) / z;
+        var vh = (document.documentElement.clientHeight || window.innerHeight) / z;
         box(list, vw, vh);
         box(dlg, vw, vh);
         dlg.style.setProperty('transform-origin', '0 0', 'important');
@@ -1146,8 +1148,49 @@
     var b = document.createElement('div');
     b.style.cssText = 'position:fixed;right:4px;bottom:4px;z-index:2147483647;background:rgba(0,0,0,.6);' +
         'color:#7CFC7C;font:10px ui-monospace,monospace;padding:2px 5px;border-radius:6px;pointer-events:none';
-    b.textContent = 'TG 2.5';
+    b.textContent = 'TG 2.6';
     var put = function () { if (document.body) document.body.appendChild(b); };
+    if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
+})();
+</script>
+<script>
+/* Масштаб интерфейса прямо в приложении: "-" меньше, "+" больше.
+   Нужно, чтобы подогнать размер под конкретный телефон без новой сборки. */
+(function () {
+    if (!/TailGramAndroid/.test(navigator.userAgent)) return;
+    var MIN = 0.72, MAX = 1.30, STEP = 0.06;
+    var z = 1;
+    try { z = parseFloat(localStorage.getItem('tg_zoom') || '1') || 1; } catch (e) { z = 1; }
+    z = Math.min(MAX, Math.max(MIN, z));
+    var box, label;
+    function build() {
+        box = document.createElement('div');
+        box.id = 'tgZoom';
+        box.style.cssText = 'position:fixed;right:6px;bottom:26px;z-index:2147483647;display:flex;align-items:center;gap:6px;' +
+            'background:rgba(0,0,0,.62);border-radius:20px;padding:4px 8px;';
+        var minus = document.createElement('button');
+        minus.textContent = '\u2212';
+        var plus = document.createElement('button');
+        plus.textContent = '+';
+        label = document.createElement('span');
+        var st = 'background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;width:26px;height:26px;' +
+            'border-radius:13px;font-size:15px;line-height:1;padding:0;';
+        minus.style.cssText = st; plus.style.cssText = st;
+        label.style.cssText = 'color:#fff;font:11px ui-monospace,monospace;min-width:34px;text-align:center';
+        box.appendChild(minus); box.appendChild(label); box.appendChild(plus);
+        document.body.appendChild(box);
+        minus.onclick = function () { setZoom(z - STEP); };
+        plus.onclick = function () { setZoom(z + STEP); };
+    }
+    function setZoom(v) {
+        z = Math.min(MAX, Math.max(MIN, Math.round(v * 100) / 100));
+        try { localStorage.setItem('tg_zoom', String(z)); } catch (e) {}
+        document.documentElement.style.zoom = z;
+        if (label) label.textContent = Math.round(z * 100) + '%';
+        if (window.TG_LAYOUT) window.TG_LAYOUT();
+    }
+    window.TG_SET_ZOOM = setZoom;
+    var put = function () { if (document.body && !box) { build(); setZoom(z); } };
     if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
 })();
 </script>
