@@ -137,7 +137,7 @@
             flex: 1; min-width: 0; min-height: 0; position: relative; overflow: hidden;
             background: var(--tg-dialog-bg); z-index: 1;
         }
-        .dialog-inner { position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; }
+        .dialog-inner { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; min-height: 0; }
         .app-container:not(.chat-active) .dialog-inner { display: none; }
 
         /* ============ HEADER ============ */
@@ -222,7 +222,7 @@
         .story-viewer-head .sv-time { font-size: .7rem; color: rgba(255,255,255,.6); }
         .story-viewer-meta { color: rgba(255,255,255,.75); font-size: .78rem; font-weight: 700; white-space: nowrap; }
         .story-viewer-body { flex: 1; position: relative; overflow: hidden; background: #000; }
-        .story-slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+        .story-slide { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; }
         .story-slide.text-mode { background: linear-gradient(160deg, var(--tg-accent), var(--tg-accent-2)); }
         .story-slide img { width: 100%; height: 100%; object-fit: contain; }
         .story-viewer-caption {
@@ -320,7 +320,7 @@
 
         .video-circle-wrap { width: 200px; height: 200px; border-radius: 50%; overflow: hidden; position: relative; margin: 5px 0; background: #000; cursor: pointer; border: 3px solid var(--tg-accent); box-shadow: 0 10px 30px -8px var(--tg-accent); }
         .video-circle-wrap video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        .video-circle-play-btn { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.34); color: #fff; font-size: 2.2rem; transition: opacity .2s; }
+        .video-circle-play-btn { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.34); color: #fff; font-size: 2.2rem; transition: opacity .2s; }
         .video-circle-wrap.playing .video-circle-play-btn { opacity: 0; }
         .speed-badge { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.7); padding: 2px 8px; border-radius: 10px; font-size: .64rem; font-weight: 700; color: #fff; }
 
@@ -409,7 +409,7 @@
         .input-panel:not(.has-text) #sendMsgBtn { display: none !important; }
         .input-panel:not(.has-text) #voiceRecordBtn, .input-panel:not(.has-text) #circleRecordBtn { display: flex !important; }
 
-        .recording-bar { position: absolute; inset: 0; z-index: 20; display: none; align-items: center; justify-content: space-between; padding: 0 16px calc(var(--safe-bottom)); background: var(--tg-bg); }
+        .recording-bar { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 20; display: none; align-items: center; justify-content: space-between; padding: 0 16px calc(var(--safe-bottom)); background: var(--tg-bg); }
         .recording-bar.active { display: flex; }
         .live-mic-wave { display: flex; align-items: center; gap: 3px; height: 22px; }
         .live-mic-bar { width: 3px; height: 6px; border-radius: 2px; background: #ef4444; transition: height .08s; }
@@ -432,7 +432,7 @@
         .attach-item:hover { background: var(--tg-hover); color: var(--tg-accent); }
 
         /* ============ DIALOG EMPTY ============ */
-        .dialog-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: var(--tg-text-muted); }
+        .dialog-empty { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: var(--tg-text-muted); }
         .dialog-empty img { width: 104px; height: 104px; border-radius: 30px; box-shadow: 0 20px 50px -14px var(--tg-accent), 0 0 0 3px rgba(255,255,255,.35); animation: floatY 4s ease-in-out infinite; }
         .dialog-empty h3 { color: var(--tg-text); font-size: 1.05rem; }
         .dialog-empty p { font-size: .82rem; max-width: 280px; line-height: 1.6; }
@@ -440,7 +440,7 @@
 
         /* ============ MODALS ============ */
         .modal-overlay {
-            position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 18px;
+            position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 18px;
             background: var(--tg-overlay); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
         }
         .modal-overlay.open { display: flex; }
@@ -469,7 +469,7 @@
         .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--tg-border); }
         .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .switch .slider { position: absolute; inset: 0; cursor: pointer; border-radius: 99px; background: var(--tg-border); transition: background .2s; }
+        .switch .slider { position: absolute; top: 0; right: 0; bottom: 0; left: 0; cursor: pointer; border-radius: 99px; background: var(--tg-border); transition: background .2s; }
         .switch .slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: transform .22s; }
         .switch input:checked + .slider { background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-2)); }
         .switch input:checked + .slider::before { transform: translateX(20px); }
@@ -479,7 +479,7 @@
         .circle-modal-card { max-width: 330px !important; text-align: center; }
         .circle-preview-wrapper { position: relative; width: min(190px, 40vh, 56vw); height: min(190px, 40vh, 56vw); margin: 6px auto; border-radius: 50%; overflow: hidden; border: 4px solid var(--tg-accent); box-shadow: 0 0 30px rgba(0,0,0,.35); flex-shrink: 0; }
         .circle-preview-wrapper video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        .circle-rec-pulse { position: absolute; inset: 0; border-radius: 50%; border: 2px solid #ef4444; animation: recPulse 1.6s infinite; pointer-events: none; }
+        .circle-rec-pulse { position: absolute; top: 0; right: 0; bottom: 0; left: 0; border-radius: 50%; border: 2px solid #ef4444; animation: recPulse 1.6s infinite; pointer-events: none; }
         @keyframes recPulse { 0% { transform: scale(1); opacity: .8; } 50% { transform: scale(1.06); opacity: .15; } 100% { transform: scale(1); opacity: .8; } }
 
         .call-video-box { width: 100%; height: 280px; background: #000; border-radius: 16px; position: relative; overflow: hidden; display: none; align-items: center; justify-content: center; }
@@ -499,10 +499,10 @@
         }
         .toast-notice.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+        #confettiCanvas { position: fixed; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 9999; }
 
         /* ============ SPLASH ============ */
-        .splash { position: fixed; inset: 0; z-index: 8000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: var(--tg-hero); transition: opacity .5s ease, visibility .5s; }
+        .splash { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 8000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: var(--tg-hero); transition: opacity .5s ease, visibility .5s; }
         .splash.hidden { opacity: 0; visibility: hidden; }
         .splash img { width: 108px; height: 108px; border-radius: 32px; box-shadow: 0 30px 70px -16px var(--tg-accent), 0 0 0 3px rgba(255,255,255,.35); animation: floatY 3s ease-in-out infinite; }
         .splash h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: .3px; background: linear-gradient(120deg, var(--tg-accent), var(--tg-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -514,7 +514,7 @@
 
         /* ============ WELCOME ============ */
         .welcome-overlay {
-            position: fixed; inset: 0; z-index: 7000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 26px;
+            position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 7000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 26px;
             background: var(--tg-hero);
         }
         .welcome-overlay.open { display: flex; }
@@ -530,8 +530,8 @@
 
         /* ============ MOBILE / NARROW ============ */
         @media (max-width: 719px) {
-            .view-chats { position: absolute; inset: 0; width: 100%; flex: 0 0 100%; border-right: none; }
-            .view-dialog { position: absolute; inset: 0; transform: translateX(100%); transition: transform .32s cubic-bezier(.2,.8,.2,1); will-change: transform; }
+            .view-chats { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; flex: 0 0 100%; border-right: none; }
+            .view-dialog { position: absolute; top: 0; right: 0; bottom: 0; left: 0; transform: translateX(100%); transition: transform .32s cubic-bezier(.2,.8,.2,1); will-change: transform; }
             .app-container.chat-active .view-chats { transform: translateX(-25%); filter: brightness(.45); pointer-events: none; }
             .app-container.chat-active .view-dialog { transform: translateX(0); }
             .dialog-empty { display: none !important; }
@@ -547,11 +547,11 @@
         html.android-app { overflow: hidden; }
         html.android-app .app-container { overflow: hidden; }
         html.android-app .view-chats {
-            position: absolute; inset: 0; width: 100%; flex: 0 0 100%; border-right: none;
+            position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; flex: 0 0 100%; border-right: none;
             transition: transform .30s cubic-bezier(.2,.8,.2,1);
         }
         html.android-app .view-dialog {
-            position: absolute; inset: 0; width: 100%; flex: 0 0 100%;
+            position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; flex: 0 0 100%;
             transform: translateX(100%);
             transition: transform .32s cubic-bezier(.2,.8,.2,1); will-change: transform;
         }
@@ -1032,6 +1032,64 @@
     setTimeout(show, 500);
     setTimeout(function () { el.style.display = 'none'; }, 15000);
     window.TG_DIAG = show;
+})();
+</script>
+<script>
+/* Раскладка экрана на Android: задаём панели размеры напрямую, чтобы не зависеть
+   от поддержки CSS (inset, flex-basis) в конкретной версии WebView. */
+(function () {
+    if (!/TailGramAndroid/.test(navigator.userAgent)) return;
+    var forced = false;
+    function box(el, w, h) {
+        el.style.setProperty('position', 'absolute', 'important');
+        el.style.setProperty('top', '0', 'important');
+        el.style.setProperty('left', '0', 'important');
+        el.style.setProperty('right', 'auto', 'important');
+        el.style.setProperty('bottom', 'auto', 'important');
+        el.style.setProperty('width', w + 'px', 'important');
+        el.style.setProperty('height', h + 'px', 'important');
+        el.style.setProperty('margin', '0', 'important');
+    }
+    function layout() {
+        var root = document.getElementById('appRoot');
+        if (!root) return;
+        var list = root.querySelector('.view-chats');
+        var dlg = root.querySelector('.view-dialog');
+        if (!list || !dlg) return;
+        var vw = document.documentElement.clientWidth || window.innerWidth;
+        var vh = document.documentElement.clientHeight || window.innerHeight;
+        box(list, vw, vh);
+        box(dlg, vw, vh);
+        dlg.style.setProperty('transform-origin', '0 0', 'important');
+        dlg.style.setProperty('transition', 'transform .3s cubic-bezier(.2,.8,.2,1)', 'important');
+        list.style.setProperty('transition', 'transform .3s cubic-bezier(.2,.8,.2,1)', 'important');
+        var on = root.classList.contains('chat-active');
+        dlg.style.setProperty('transform', on ? 'translateX(0)' : 'translateX(' + vw + 'px)', 'important');
+        list.style.setProperty('transform', on ? 'translateX(-' + Math.round(vw * 0.22) + 'px)' : 'translateX(0)', 'important');
+        if (on) { list.style.setProperty('filter', 'brightness(.45)', 'important'); list.style.setProperty('pointer-events', 'none', 'important'); }
+        else { list.style.setProperty('filter', 'none', 'important'); list.style.setProperty('pointer-events', 'auto', 'important'); }
+        var inner = root.querySelector('.dialog-inner');
+        if (inner) box(inner, vw, vh);
+        var empty = root.querySelector('.dialog-empty');
+        if (empty) empty.style.setProperty('display', 'none', 'important');
+        var back = root.querySelector('.back-btn');
+        if (back) back.style.setProperty('display', 'flex', 'important');
+        forced = true;
+    }
+    function hook() {
+        layout();
+        var root = document.getElementById('appRoot');
+        if (!root || root.__tgObserved) return;
+        root.__tgObserved = true;
+        new MutationObserver(function () { layout(); })
+            .observe(root, { attributes: true, attributeFilter: ['class'] });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook);
+    else hook();
+    window.addEventListener('load', hook);
+    window.addEventListener('resize', function () { if (forced) layout(); });
+    window.addEventListener('orientationchange', function () { setTimeout(hook, 250); });
+    window.TG_LAYOUT = layout;
 })();
 </script>
 </body>
