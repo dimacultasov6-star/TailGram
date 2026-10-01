@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=412, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#f8f2e3">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -566,7 +566,7 @@
 
         /* ============ ANDROID: COMPACT SIZES ============
            Интерфейс сделан для ПК: на телефоне элементы не помещались. */
-        html.android-app { font-size: 16px; }
+        html.android-app { font-size: clamp(15px, 4vw, 16px); }
         html.android-app .app-header { min-height: 52px; padding: 7px 10px; gap: 6px; }
         html.android-app .avatar-view { width: 34px; height: 34px; font-size: .92rem; }
         html.android-app .profile-block { gap: 8px; }

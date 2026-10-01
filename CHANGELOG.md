@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [2.8] -- 2026-10-01
+
+### Fixed
+- **Android: root cause of the cropped UI.** The viewport meta had minimum-scale=1.0, which
+  forbade the WebView from scaling the page down, so any screen narrower than 412 px lost
+  the right-hand part of the interface. Now width=device-width: the layout matches the real
+  screen width, nothing is cut off and nothing is shrunk.
+- Adaptive root font size clamp(15px, 4vw, 16px); verified at 360 / 390 / 412 px.
+
 ## [2.7] -- 2026-10-01
 
 ### Changed

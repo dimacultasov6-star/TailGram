@@ -16,8 +16,8 @@ $PROJ = $PSScriptRoot
 $WORK = Join-Path $env:TEMP "tg_apk_build"
 $OUT  = Join-Path $WORK "build"
 
-$VER_CODE = 9
-$VER_NAME = "2.7"
+$VER_CODE = 10
+$VER_NAME = "2.8"
 
 if (Test-Path $WORK) { Remove-Item $WORK -Recurse -Force }
 New-Item -ItemType Directory -Path $OUT | Out-Null
@@ -75,7 +75,7 @@ try {
     $e = $chk.GetEntry("assets/index.html")
     $rd = New-Object System.IO.StreamReader($e.Open(), [System.Text.Encoding]::UTF8)
     $html = $rd.ReadToEnd(); $rd.Close()
-    if ($html -notmatch 'width=412') { throw "APK index.html has unexpected viewport meta" }
+    if ($html -notmatch 'width=device-width') { throw "APK index.html has unexpected viewport meta" }
     if ($html -notmatch "html\.android-app \.back-btn") { throw "APK index.html is missing android single-pane CSS" }
     if ($html -notmatch "TailGramAndroid") { throw "APK index.html is missing UA-based android detection" }
 } finally { $chk.Dispose() }
