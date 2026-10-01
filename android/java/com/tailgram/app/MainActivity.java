@@ -72,8 +72,9 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setAllowContentAccess(true);
         s.setLoadsImagesAutomatically(true);
-        s.setUseWideViewPort(true);
+        s.setUseWideViewPort(false);
         s.setLoadWithOverviewMode(false);
+        web.setInitialScale(100);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
@@ -84,7 +85,7 @@ public class MainActivity extends Activity {
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
         s.setGeolocationEnabled(true);
-        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/2.0");
+        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/2.1");
 
         WebView.setWebContentsDebuggingEnabled(false);
 

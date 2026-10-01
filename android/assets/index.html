@@ -9,6 +9,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/png" href="logo.png">
     <title>TailGram — Ультра Мессенджер</title>
+    <script>
+        /* Однопанельная вёрстка на телефоне: класс ставим сразу, до отрисовки */
+        if (window.AndroidNative) document.documentElement.classList.add('android-app');
+    </script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         /* --- Mobile / Android optimizations --- */
@@ -534,6 +538,30 @@
             .message-bubble { max-width: 86%; }
             .tb-brand span { display: none; }
         }
+
+        /* ============ ANDROID: single-pane ALWAYS ============
+           На телефоне список чатов и чат не должны показываться одновременно.
+           WebView может сообщать ширину больше экрана, поэтому однопанельный
+           режим включается классом android-app, а не только медиазапросом. */
+        html.android-app { overflow: hidden; }
+        html.android-app .app-container { overflow: hidden; }
+        html.android-app .view-chats {
+            position: absolute; inset: 0; width: 100%; flex: 0 0 100%; border-right: none;
+            transition: transform .30s cubic-bezier(.2,.8,.2,1);
+        }
+        html.android-app .view-dialog {
+            position: absolute; inset: 0; width: 100%; flex: 0 0 100%;
+            transform: translateX(100%);
+            transition: transform .32s cubic-bezier(.2,.8,.2,1); will-change: transform;
+        }
+        html.android-app .app-container.chat-active .view-chats {
+            transform: translateX(-22%); filter: brightness(.45); pointer-events: none;
+        }
+        html.android-app .app-container.chat-active .view-dialog { transform: translateX(0); }
+        html.android-app .dialog-empty { display: none !important; }
+        html.android-app .back-btn { display: flex !important; }
+        html.android-app .message-bubble { max-width: 86%; }
+        html.android-app .tb-brand span { display: none; }
     </style>
 </head>
 <body data-theme="puppy">

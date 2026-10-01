@@ -1,5 +1,11 @@
 $ErrorActionPreference = "Stop"
 
+function Step([string]$name, [scriptblock]$block) {
+    Write-Host "[$name]..."
+    & $block
+    if ($LASTEXITCODE -ne 0) { throw "Шаг '$name' завершился с ошибкой (код $LASTEXITCODE)" }
+}
+
 $SDK    = "$env:LOCALAPPDATA\Android\Sdk"
 $BT     = "$SDK\build-tools\34.0.0"
 $JDK    = "C:\Program Files\Android\Android Studio\jbr\bin"
@@ -17,29 +23,53 @@ Copy-Item (Join-Path $PROJ "assets") $WORK -Recurse
 Copy-Item (Join-Path $PROJ "java") $WORK -Recurse
 Copy-Item (Join-Path $PROJ "AndroidManifest.xml") $WORK
 
-Write-Host "[1/6] aapt2 compile"
-& "$BT\aapt2.exe" compile --dir "$WORK\res" -o "$OUT\res.zip"
+Step "1/6 aapt2 compile" { & "$BT\aapt2.exe" compile --dir "$WORK\res" -o "$OUT\res.zip" }
 
-Write-Host "[2/6] aapt2 link"
-& "$BT\aapt2.exe" link -o "$OUT\base.apk" -I "$SDKJAR" --manifest "$WORK\AndroidManifest.xml" -A "$WORK\assets" --min-sdk-version 24 --target-sdk-version 34 --version-code 2 --version-name 2.0 "$OUT\res.zip"
+Step "2/6 aapt2 link" {
+    & "$BT\aapt2.exe" link -o "$OUT\base.apk" -I "$SDKJAR" --manifest "$WORK\AndroidManifest.xml" `
+        -A "$WORK\assets" --min-sdk-version 24 --target-sdk-version 34 `
+        --version-code 3 --version-name 2.1 "$OUT\res.zip"
+}
 
-Write-Host "[3/6] javac"
 New-Item -ItemType Directory -Path "$OUT\classes" | Out-Null
-& "$JDK\javac.exe" --release 8 -nowarn -encoding UTF-8 -classpath "$SDKJAR" -d "$OUT\classes" (Join-Path $WORK "java\com\tailgram\app\MainActivity.java")
+Step "3/6 javac" {
+    & "$JDK\javac.exe" --release 8 -nowarn -encoding UTF-8 -classpath "$SDKJAR" `
+        -d "$OUT\classes" (Join-Path $WORK "java\com\tailgram\app\MainActivity.java")
+}
+if (-not (Get-ChildItem "$OUT\classes" -Recurse -Filter *.class)) { throw "javac не создал ни одного класса" }
 
-Write-Host "[4/6] d8"
 New-Item -ItemType Directory -Path "$OUT\dex" | Out-Null
-$cls = Get-ChildItem "$OUT\classes" -Recurse -Filter *.class | ForEach-Object { $_.FullName }
-& "$JDK\java.exe" -cp $R8JAR com.android.tools.r8.D8 --lib $SDKJAR --min-api 24 --output "$OUT\dex" @cls
+$cls = @(Get-ChildItem "$OUT\classes" -Recurse -Filter *.class | ForEach-Object { $_.FullName })
+Step "4/6 d8" { & "$JDK\java.exe" -cp $R8JAR com.android.tools.r8.D8 --lib $SDKJAR --min-api 24 --output "$OUT\dex" @cls }
+if (-not (Test-Path "$OUT\dex\classes.dex")) { throw "d8 не создал classes.dex" }
 
-Write-Host "[5/6] zipalign + add dex"
-Push-Location "$OUT\dex"
-& "$BT\aapt.exe" add "$OUT\base.apk" "classes.dex" | Out-Null
-Pop-Location
-& "$BT\zipalign.exe" -f -p 4 "$OUT\base.apk" "$OUT\aligned.apk"
+Step "5/6 aapt add + zipalign" {
+    Push-Location "$OUT\dex"
+    try { & "$BT\aapt.exe" add "$OUT\base.apk" "classes.dex" } finally { Pop-Location }
+    & "$BT\zipalign.exe" -f -p 4 "$OUT\base.apk" "$OUT\aligned.apk"
+}
 
-Write-Host "[6/6] apksigner"
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-& "$BT\apksigner.bat" sign --ks (Join-Path $PROJ "keys\tailgram.keystore") --ks-pass pass:tailgram --key-pass pass:tailgram --ks-key-alias tailgram --v2-signing-enabled true --v3-signing-enabled true --out (Join-Path $PROJ "..\TailGram.apk") "$OUT\aligned.apk"
+$APK = Join-Path $PROJ "..\TailGram.apk"
+Step "6/6 apksigner" {
+    & "$BT\apksigner.bat" sign --ks (Join-Path $PROJ "keys\tailgram.keystore") `
+        --ks-pass pass:tailgram --key-pass pass:tailgram --ks-key-alias tailgram `
+        --v2-signing-enabled true --v3-signing-enabled true `
+        --out $APK "$OUT\aligned.apk"
+}
 
-Write-Host "OK -> $(Join-Path $PROJ '..\TailGram.apk')"
+Remove-Item (Join-Path $PROJ "..\TailGram.apk.idsig") -Force -ErrorAction SilentlyContinue
+
+# Проверка: подпись, наличие dex и assets
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$chk = [System.IO.Compression.ZipFile]::OpenRead($APK)
+try {
+    $names = $chk.Entries | ForEach-Object { $_.FullName }
+    foreach ($need in @("classes.dex", "AndroidManifest.xml", "assets/index.html", "assets/app.js", "assets/logo.png")) {
+        if ($names -notcontains $need) { throw "В APK нет $need" }
+    }
+} finally { $chk.Dispose() }
+& "$BT\apksigner.bat" verify $APK
+if ($LASTEXITCODE -ne 0) { throw "Подпись APK не прошла проверку" }
+
+Write-Host "OK -> $APK  ($([math]::Round((Get-Item $APK).Length/1KB)) KB)"
