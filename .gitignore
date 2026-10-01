@@ -1,0 +1,14 @@
+# Сборки не нужны
+build/
+*.apk
+*.idsig
+*.exe
+*.zip
+*.dll
+*.keystore
+!.gitkeep
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini

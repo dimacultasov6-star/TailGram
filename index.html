@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TailGram — Ультра Мессенджер · Скачать</title>
+<meta name="description" content="TailGram — мессенджер без сервера: переписка, звонки, истории и группы напрямую между устройствами. Скачать для Windows и Android.">
+<meta name="theme-color" content="#0b1220">
+<link rel="icon" href="assets/logo.png">
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0e1628; --card:#111c31; --border:rgba(148,175,255,.12);
+    --accent:#38bdf8; --accent-2:#6366f1; --text:#f8fafc; --muted:#8ea0bd;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text); overflow-x:hidden;
+    font-family:"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(70% 55% at 18% 0%, rgba(56,189,248,.20), transparent 60%),
+      radial-gradient(60% 50% at 85% 10%, rgba(99,102,241,.22), transparent 60%),
+      radial-gradient(90% 60% at 50% 100%, rgba(56,189,248,.08), transparent 70%);
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:0 20px}
+  header{display:flex; align-items:center; justify-content:space-between; padding:18px 0}
+  .brand{display:flex; align-items:center; gap:12px; font-weight:800; font-size:1.05rem; letter-spacing:.2px}
+  .brand img{width:40px;height:40px;border-radius:11px}
+  nav a{color:var(--muted); text-decoration:none; font-size:.9rem; margin-left:20px}
+  nav a:hover{color:var(--text)}
+  @media(max-width:640px){ nav{display:none} }
+
+  .hero{text-align:center; padding:52px 0 34px}
+  .hero img{width:118px;height:118px;border-radius:28px; box-shadow:0 24px 60px -18px rgba(56,189,248,.7)}
+  h1{font-size:clamp(2.1rem,6vw,3.4rem); line-height:1.08; margin:22px 0 14px; letter-spacing:-.5px}
+  .grad{background:linear-gradient(120deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .lead{color:var(--muted); font-size:clamp(1rem,2.4vw,1.12rem); max-width:640px; margin:0 auto 26px}
+  .badges{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:8px}
+  .badge{border:1px solid var(--border); background:rgba(255,255,255,.03); color:var(--muted);
+         padding:7px 13px; border-radius:999px; font-size:.82rem}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin:14px 0 40px}
+  .card{background:linear-gradient(180deg,var(--card),var(--panel)); border:1px solid var(--border);
+        border-radius:22px; padding:26px 24px; display:flex; flex-direction:column; gap:14px}
+  .card h2{margin:0; font-size:1.3rem; display:flex; align-items:center; gap:10px}
+  .card p{margin:0; color:var(--muted); font-size:.93rem; line-height:1.55}
+  .btn{display:flex; align-items:center; justify-content:center; gap:10px; text-decoration:none;
+       padding:15px 18px; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer;
+       border:1px solid transparent; transition:transform .12s ease, filter .12s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:linear-gradient(120deg,var(--accent),var(--accent-2)); color:#03121f}
+  .btn-primary:hover{filter:brightness(1.07)}
+  .btn-ghost{background:rgba(255,255,255,.04); border-color:var(--border); color:var(--text)}
+  .btn-ghost:hover{background:rgba(255,255,255,.08)}
+  .meta{display:flex; gap:8px; flex-wrap:wrap}
+  .meta span{font-size:.74rem; color:var(--muted); border:1px solid var(--border);
+              padding:4px 9px; border-radius:8px}
+  .direct{font-size:.78rem; color:var(--muted); word-break:break-all; background:rgba(0,0,0,.28);
+          border:1px solid var(--border); border-radius:10px; padding:10px 12px}
+  .direct b{color:var(--text)}
+
+  h2.sec{font-size:1.5rem; margin:44px 0 18px}
+  .feats{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; margin-bottom:40px}
+  .feat{background:rgba(255,255,255,.028); border:1px solid var(--border); border-radius:16px; padding:16px 17px}
+  .feat i{font-style:normal; font-size:1.35rem}
+  .feat b{display:block; margin:7px 0 4px; font-size:.97rem}
+  .feat span{color:var(--muted); font-size:.85rem; line-height:1.5}
+
+  .steps{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-bottom:44px}
+  .step{border-left:3px solid var(--accent); padding:6px 0 6px 16px}
+  .step b{display:block; margin-bottom:6px}
+  .step span{color:var(--muted); font-size:.88rem; line-height:1.6}
+
+  footer{border-top:1px solid var(--border); margin-top:24px; padding:26px 0 46px;
+         display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; color:var(--muted); font-size:.85rem}
+  footer a{color:var(--accent); text-decoration:none}
+  code{background:rgba(0,0,0,.3); padding:2px 7px; border-radius:6px; font-size:.85em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand"><img src="assets/logo.png" alt="TailGram"><span>TailGram</span></div>
+    <nav>
+      <a href="#download">Скачать</a>
+      <a href="#features">Возможности</a>
+      <a href="https://github.com/dimacultasov6-star/TailGram" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <img src="assets/logo.png" alt="TailGram">
+    <h1>Мессенджер, который<br><span class="grad">не нужен серверу</span></h1>
+    <p class="lead">Переписка, звонки, истории и группы — напрямую между устройствами по P2P.
+       Есть версии для Windows и Android.</p>
+    <div class="badges">
+      <div class="badge">🪟 Windows 10/11</div>
+      <div class="badge">🤖 Android 7.0+</div>
+      <div class="badge">🔐 Данные только у вас</div>
+      <div class="badge">⚡ P2P / WebRTC</div>
+    </div>
+  </section>
+
+  <section id="download">
+    <h2 class="sec">⬇️ Скачать</h2>
+    <div class="grid">
+      <div class="card">
+        <h2>🪟 Windows</h2>
+        <p>Один архив: <code>TailGram.exe</code> и библиотеки WebView2. Установка не нужна —
+           запустил и работает.</p>
+        <a class="btn btn-primary" href="https://github.com/dimacultasov6-star/TailGram/releases/latest/download/TailGram-Windows-x64.zip" download>
+          Скачать для Windows · 465 КБ</a>
+        <div class="meta"><span>Windows 10/11 x64</span><span>ZIP · 465 КБ</span><span>v2.0</span></div>
+      </div>
+      <div class="card">
+        <h2>🤖 Android</h2>
+        <p>Установочный APK. На первом запуске попросит доступ к микрофону и камере.</p>
+        <a class="btn btn-primary" href="https://github.com/dimacultasov6-star/TailGram/releases/latest/download/TailGram.apk" download>
+          Скачать APK · 149 КБ</a>
+        <div class="meta"><span>Android 7.0+</span><span>APK · 149 КБ</span><span>v2.0</span></div>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.86rem;margin:0 0 8px">Прямые ссылки всегда на свежую версию:</p>
+    <div class="direct">🪟 <b>EXE:</b> github.com/dimacultasov6-star/TailGram/releases/latest/download/TailGram-Windows-x64.zip<br>
+                        🤖 <b>APK:</b> github.com/dimacultasov6-star/TailGram/releases/latest/download/TailGram.apk</div>
+  </section>
+
+  <section id="features">
+    <h2 class="sec">✨ Возможности</h2>
+    <div class="feats">
+      <div class="feat"><i>💬</i><b>Переписка</b><span>Текст, голосовые, кружки, фото и файлы</span></div>
+      <div class="feat"><i>📞</i><b>Звонки</b><span>Аудио и видео через WebRTC</span></div>
+      <div class="feat"><i>✏️</i><b>Редактирование</b><span>Правка своих сообщений с пометкой «изменено»</span></div>
+      <div class="feat"><i>📬</i><b>Офлайн-доставка</b><span>Сообщения уходят, когда собеседник снова в сети</span></div>
+      <div class="feat"><i>🟢</i><b>Статусы</b><span>«В сети» и «печатает…» в реальном времени</span></div>
+      <div class="feat"><i>👥</i><b>Группы и каналы</b><span>Общие чаты, роли и администраторы</span></div>
+      <div class="feat"><i>📖</i><b>Истории</b><span>Stories на 24 часа со счётчиком просмотров</span></div>
+      <div class="feat"><i>🎁</i><b>Подарки</b><span>Звёзды, подарки и колесо бонусов</span></div>
+      <div class="feat"><i>😊</i><b>Реакции</b><span>Эмодзи-реакции на любые сообщения</span></div>
+      <div class="feat"><i>🎮</i><b>Игры</b><span>Крестики-нолики прямо в чате</span></div>
+      <div class="feat"><i>📌</i><b>Закреп</b><span>Важное сообщение поверх чата</span></div>
+      <div class="feat"><i>🔊</i><b>Озвучка</b><span>Проговаривание текста сообщений</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">🛠 Как установить</h2>
+    <div class="steps">
+      <div class="step"><b>Windows</b><span>Скачайте ZIP, распакуйте в любую папку и запустите <code>TailGram.exe</code>.
+        WebView2 Runtime, если его нет, установится сам.</span></div>
+      <div class="step"><b>Android</b><span>Скачайте APK на телефон, разрешите установку из этого источника
+        и откройте файл. Разрешите микрофон и камеру при первом запуске.</span></div>
+      <div class="step"><b>Важно</b><span>Не вытаскивайте <code>exe</code> из архива — рядом с ним нужны три
+        WebView2-библиотеки, они уже лежат в архиве.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 dimacultasov6-star · <a href="https://github.com/dimacultasov6-star/TailGram" target="_blank" rel="noopener">Исходный код</a> · MIT</span>
+    <span>Сообщения идут напрямую между устройствами. История хранится только у вас.</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f8f2e3">
+    <link rel="icon" type="image/png" href="logo.png">
+    <title>TailGram — Ультра Мессенджер</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --tg-bg: #0b1220;
+            --tg-panel: #0e1628;
+            --tg-dialog-bg: #070b14;
+            --tg-header-bg: rgba(11, 18, 32, 0.82);
+            --tg-accent: #38bdf8;
+            --tg-accent-2: #6366f1;
+            --tg-accent-hover: #0ea5e9;
+            --tg-text: #f8fafc;
+            --tg-text-muted: #7c8aa5;
+            --tg-bubble-my: linear-gradient(135deg, #2563eb, #4f46e5);
+            --tg-bubble-my-color: #ffffff;
+            --tg-bubble-peer: #141d31;
+            --tg-border: rgba(148, 175, 255, 0.10);
+            --tg-hover: rgba(148, 175, 255, 0.07);
+            --tg-shadow: 0 26px 60px -18px rgba(0, 0, 0, 0.85);
+            --tg-radius: 18px;
+            --tg-font: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --titlebar-h: 42px;
+            --tg-focus: rgba(56, 189, 248, 0.16);
+            --tg-overlay: rgba(3, 6, 12, 0.72);
+            --tg-titlebar: linear-gradient(180deg, rgba(20, 30, 52, 0.96), rgba(11, 18, 32, 0.95));
+            --tg-hero: radial-gradient(120% 120% at 30% 20%, #12203c 0%, #05070d 70%);
+            --tg-reply-bg: rgba(0, 0, 0, 0.28);
+            --tg-chip-bg: rgba(0, 0, 0, 0.30);
+            --tg-ring: conic-gradient(from 180deg, #f59e0b, #ec4899, #38bdf8, #f59e0b);
+        }
+
+        [data-theme="puppy"] {
+            --tg-bg: #f8f2e3; --tg-panel: #fff9ee; --tg-dialog-bg: #f2e9d4;
+            --tg-header-bg: rgba(255, 250, 240, 0.85);
+            --tg-accent: #d98e2b; --tg-accent-2: #b9682a; --tg-accent-hover: #c08023;
+            --tg-text: #3f2f1e; --tg-text-muted: #a08a68;
+            --tg-bubble-my: linear-gradient(135deg, #eea44b, #d0822f); --tg-bubble-my-color: #ffffff;
+            --tg-bubble-peer: #ffffff;
+            --tg-border: rgba(150, 105, 55, 0.16); --tg-hover: rgba(217, 142, 43, 0.10);
+            --tg-shadow: 0 26px 60px -18px rgba(140, 95, 40, 0.35);
+            --tg-focus: rgba(217, 142, 43, 0.16);
+            --tg-overlay: rgba(70, 48, 22, 0.45);
+            --tg-titlebar: linear-gradient(180deg, rgba(255, 248, 231, 0.96), rgba(255, 250, 240, 0.94));
+            --tg-hero: radial-gradient(120% 120% at 30% 20%, #fff3d4 0%, #efe0bd 75%);
+            --tg-reply-bg: rgba(150, 105, 55, 0.16);
+            --tg-chip-bg: rgba(150, 105, 55, 0.16);
+            --tg-ring: conic-gradient(from 180deg, #eeb04e, #c97f2c, #f5dc9a, #eeb04e);
+        }
+
+        [data-theme="matrix"] { --tg-bg:#05130a; --tg-panel:#071a0d; --tg-dialog-bg:#020a05; --tg-header-bg:rgba(5,19,10,.82); --tg-accent:#22c55e; --tg-accent-2:#0d9488; --tg-accent-hover:#16a34a; --tg-text:#dcfce7; --tg-text-muted:#5a9c72; --tg-bubble-my:linear-gradient(135deg,#15803d,#166534); --tg-bubble-peer:#0a2414; --tg-border:rgba(34,197,94,.18); --tg-hover:rgba(34,197,94,.09); }
+        [data-theme="cyberpunk"] { --tg-bg:#1b0426; --tg-panel:#22062f; --tg-dialog-bg:#0e0115; --tg-header-bg:rgba(27,4,38,.82); --tg-accent:#f43f5e; --tg-accent-2:#a21caf; --tg-accent-hover:#e11d48; --tg-text:#ffe4e6; --tg-text-muted:#a86b7e; --tg-bubble-my:linear-gradient(135deg,#be123c,#a21caf); --tg-bubble-peer:#2a0a34; --tg-border:rgba(244,63,94,.22); --tg-hover:rgba(244,63,94,.10); }
+        [data-theme="amoled"] { --tg-bg:#000000; --tg-panel:#050505; --tg-dialog-bg:#000000; --tg-header-bg:rgba(8,8,8,.86); --tg-accent:#38bdf8; --tg-accent-2:#818cf8; --tg-accent-hover:#0284c7; --tg-text:#ffffff; --tg-text-muted:#71717a; --tg-bubble-my:linear-gradient(135deg,#1d4ed8,#4f46e5); --tg-bubble-peer:#0d0d0f; --tg-border:rgba(255,255,255,.13); --tg-hover:rgba(255,255,255,.06); }
+        [data-theme="ocean"] { --tg-bg:#062c44; --tg-panel:#073048; --tg-dialog-bg:#031a29; --tg-header-bg:rgba(6,44,68,.82); --tg-accent:#38bdf8; --tg-accent-2:#14b8a6; --tg-accent-hover:#0284c7; --tg-text:#e0f2fe; --tg-text-muted:#6fa8c9; --tg-bubble-my:linear-gradient(135deg,#0284c7,#0d9488); --tg-bubble-peer:#0a3b57; --tg-border:rgba(56,189,248,.18); --tg-hover:rgba(56,189,248,.09); }
+        [data-theme="sunset"] { --tg-bg:#2b0e5e; --tg-panel:#32126d; --tg-dialog-bg:#1c0838; --tg-header-bg:rgba(43,14,94,.82); --tg-accent:#fb923c; --tg-accent-2:#f43f5e; --tg-accent-hover:#f97316; --tg-text:#ffedd5; --tg-text-muted:#c08497; --tg-bubble-my:linear-gradient(135deg,#ea580c,#e11d48); --tg-bubble-peer:#3a1478; --tg-border:rgba(251,146,60,.20); --tg-hover:rgba(251,146,60,.10); }
+        [data-theme="emerald"] { --tg-bg:#043b2c; --tg-panel:#05422f; --tg-dialog-bg:#012218; --tg-header-bg:rgba(4,59,44,.82); --tg-accent:#10b981; --tg-accent-2:#22d3ee; --tg-accent-hover:#059669; --tg-text:#ecfdf5; --tg-text-muted:#5aa892; --tg-bubble-my:linear-gradient(135deg,#059669,#0891b2); --tg-bubble-peer:#064e3b; --tg-border:rgba(16,185,129,.18); --tg-hover:rgba(16,185,129,.09); }
+        [data-theme="sakura"] { --tg-bg:#2a081e; --tg-panel:#310a23; --tg-dialog-bg:#190412; --tg-header-bg:rgba(42,8,30,.82); --tg-accent:#f472b6; --tg-accent-2:#a78bfa; --tg-accent-hover:#ec4899; --tg-text:#fdf2f8; --tg-text-muted:#b3778f; --tg-bubble-my:linear-gradient(135deg,#db2777,#7c3aed); --tg-bubble-peer:#3b0f2b; --tg-border:rgba(244,114,182,.22); --tg-hover:rgba(244,114,182,.10); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--tg-font); -webkit-tap-highlight-color: transparent; }
+        input, textarea { user-select: text; -webkit-user-select: text; }
+
+        html, body { height: 100%; width: 100%; overflow: hidden; background: var(--tg-bg); color: var(--tg-text); }
+        body { display: flex; flex-direction: column; }
+        img { -webkit-user-drag: none; }
+
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--tg-border); border-radius: 99px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--tg-accent); background-clip: content-box; }
+
+        /* ============ DESKTOP TITLEBAR ============ */
+        .desktop-titlebar {
+            display: none; flex: 0 0 var(--titlebar-h); height: var(--titlebar-h);
+            align-items: center; justify-content: space-between; padding: 0 6px 0 12px;
+            background: var(--tg-titlebar);
+            border-bottom: 1px solid var(--tg-border); position: relative; z-index: 500;
+            -webkit-app-region: drag;
+        }
+        body.is-desktop .desktop-titlebar { display: flex; }
+        .tb-brand { display: flex; align-items: center; gap: 9px; pointer-events: none; }
+        .tb-brand img { width: 22px; height: 22px; border-radius: 8px; box-shadow: 0 3px 12px rgba(217,142,43,.55), 0 0 0 2px rgba(255,255,255,.28); }
+        .tb-brand b { font-size: .84rem; font-weight: 700; letter-spacing: .2px; }
+        .tb-brand span { font-size: .7rem; color: var(--tg-text-muted); margin-left: 2px; }
+        .tb-controls { display: flex; align-items: center; gap: 2px; }
+        .tb-btn {
+            width: 42px; height: 30px; border: none; background: transparent; color: var(--tg-text-muted);
+            border-radius: 8px; cursor: pointer; font-size: .95rem; display: flex; align-items: center; justify-content: center;
+            transition: background .18s, color .18s, transform .12s;
+        }
+        .tb-btn:hover { background: var(--tg-hover); color: var(--tg-text); }
+        .tb-btn:active { transform: scale(.92); }
+        .tb-btn.close:hover { background: #e11d48; color: #fff; }
+
+        /* ============ LAYOUT ============ */
+        .app-container {
+            flex: 1; min-height: 0; display: flex; flex-direction: row; position: relative;
+            background: var(--tg-bg); overflow: hidden;
+        }
+        .view-chats {
+            width: 372px; flex: 0 0 372px; display: flex; flex-direction: column; min-height: 0;
+            background: var(--tg-bg); border-right: 1px solid var(--tg-border); position: relative; z-index: 2;
+        }
+        .view-dialog {
+            flex: 1; min-width: 0; min-height: 0; position: relative; overflow: hidden;
+            background: var(--tg-dialog-bg); z-index: 1;
+        }
+        .dialog-inner { position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; }
+        .app-container:not(.chat-active) .dialog-inner { display: none; }
+
+        /* ============ HEADER ============ */
+        .app-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 10px 14px; min-height: 62px; flex-shrink: 0; z-index: 10;
+            background: var(--tg-header-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+            border-bottom: 1px solid var(--tg-border);
+        }
+        .profile-block { display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; border-radius: 12px; padding: 2px 4px; transition: background .2s; }
+        .profile-block:hover { background: var(--tg-hover); }
+        .avatar-view {
+            width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; position: relative; overflow: hidden;
+            background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-2));
+            display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1.02rem;
+            box-shadow: 0 6px 16px rgba(0,0,0,.35); border: 1.5px solid rgba(255,255,255,.14);
+        }
+        .avatar-view img { width: 100%; height: 100%; object-fit: cover; }
+        .header-actions { display: flex; align-items: center; gap: 6px; }
+
+        .icon-action-btn {
+            background: transparent; border: 1px solid transparent; font-size: 1.15rem; color: var(--tg-text-muted);
+            cursor: pointer; width: 38px; height: 38px; min-width: 38px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; padding: 0;
+            transition: transform .14s, color .16s, background .16s, border-color .16s;
+        }
+        .icon-action-btn:hover { background: var(--tg-hover); color: var(--tg-text); }
+        .icon-action-btn:active { transform: scale(.88); }
+
+        .star-counter {
+            display: flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 12px; cursor: pointer;
+            font-size: .82rem; font-weight: 700; color: #facc15;
+            background: linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.1));
+            border: 1px solid rgba(250,204,21,.34); transition: transform .14s, box-shadow .2s;
+        }
+        .star-counter:hover { box-shadow: 0 0 18px rgba(250,204,21,.24); }
+        .star-counter:active { transform: scale(.94); }
+
+        /* ============ STORIES ============ */
+        .stories-bar {
+            display: flex; gap: 12px; padding: 12px 14px 10px; overflow-x: auto; flex-shrink: 0;
+            border-bottom: 1px solid var(--tg-border); scrollbar-width: none;
+        }
+        .stories-bar::-webkit-scrollbar { display: none; }
+        .story-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; transition: transform .2s; }
+        .story-item:hover { transform: translateY(-2px); }
+        .story-ring {
+            width: 56px; height: 56px; border-radius: 50%; padding: 2.5px; display: flex;
+            background: var(--tg-ring);
+            transition: transform .3s;
+        }
+        .story-item:hover .story-ring { transform: rotate(12deg) scale(1.05); }
+        .story-ring { position: relative; }
+        .story-ring.seen { background: var(--tg-border); }
+        .story-ring.story-ring-add { background: transparent; }
+        .story-add-badge {
+            position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-2)); color: #fff;
+            display: flex; align-items: center; justify-content: center; font-size: .95rem; font-weight: 800; line-height: 1;
+            border: 2px solid var(--tg-bg); box-shadow: 0 3px 10px rgba(0,0,0,.35);
+        }
+        .story-compose-preview {
+            width: 100%; height: 190px; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            background: var(--tg-bg); border: 1px dashed var(--tg-border); color: var(--tg-text-muted); text-align: center; padding: 10px;
+        }
+        .story-compose-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+        .story-viewer {
+            width: 100%; max-width: 390px; height: min(84vh, 760px); display: flex; flex-direction: column;
+            background: #05070c; border-radius: 20px; overflow: hidden; border: 1px solid var(--tg-border);
+            box-shadow: var(--tg-shadow); position: relative; animation: popIn .22s ease both;
+        }
+        .story-progress-row { display: flex; gap: 3px; padding: 10px 10px 4px; }
+        .story-progress-track { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,.28); overflow: hidden; }
+        .story-progress-fill { height: 100%; width: 0; background: #fff; border-radius: 2px; }
+        .story-progress-fill.done { width: 100%; }
+        .story-progress-fill.active { animation-name: storyFill; animation-timing-function: linear; animation-fill-mode: forwards; }
+        @keyframes storyFill { from { width: 0; } to { width: 100%; } }
+        .story-viewer-head { display: flex; align-items: center; gap: 9px; padding: 4px 12px 10px; color: #fff; }
+        .story-viewer-head .avatar-view { width: 34px; height: 34px; font-size: .8rem; }
+        .story-viewer-head .sv-name { font-weight: 700; font-size: .86rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .story-viewer-head .sv-time { font-size: .7rem; color: rgba(255,255,255,.6); }
+        .story-viewer-meta { color: rgba(255,255,255,.75); font-size: .78rem; font-weight: 700; white-space: nowrap; }
+        .story-viewer-body { flex: 1; position: relative; overflow: hidden; background: #000; }
+        .story-slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+        .story-slide.text-mode { background: linear-gradient(160deg, var(--tg-accent), var(--tg-accent-2)); }
+        .story-slide img { width: 100%; height: 100%; object-fit: contain; }
+        .story-viewer-caption {
+            position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 16px calc(16px + var(--safe-bottom));
+            background: linear-gradient(0deg, rgba(0,0,0,.8), transparent); color: #fff; font-size: .88rem; line-height: 1.5;
+        }
+        .story-viewer-text { padding: 30px; color: #fff; font-size: 1.25rem; font-weight: 600; line-height: 1.5; text-align: center; word-break: break-word; }
+        .story-viewer-nav { position: absolute; top: 0; bottom: 0; width: 34%; z-index: 3; cursor: pointer; }
+        .story-viewer-nav.left { left: 0; }
+        .story-viewer-nav.right { right: 0; }
+        .story-viewer-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px calc(12px + var(--safe-bottom)); }
+        .story-viewer-footer .action-btn { color: #fff; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); }
+        .story-viewer-footer .action-btn:hover { background: rgba(255,255,255,.16); }
+
+        .story-avatar {
+            width: 100%; height: 100%; border-radius: 50%; background: var(--tg-panel); border: 2px solid var(--tg-bg);
+            display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #fff; overflow: hidden;
+        }
+        .story-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .story-name { font-size: .7rem; color: var(--tg-text-muted); max-width: 58px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ============ FOLDERS / SEARCH ============ */
+        .folder-tabs { display: flex; gap: 6px; padding: 9px 14px; overflow-x: auto; flex-shrink: 0; scrollbar-width: none; }
+        .folder-tabs::-webkit-scrollbar { display: none; }
+        .folder-tab {
+            padding: 8px 16px; border-radius: 999px; font-size: .78rem; font-weight: 600; white-space: nowrap; cursor: pointer;
+            color: var(--tg-text-muted); background: var(--tg-panel); border: 1px solid transparent; transition: all .18s;
+        }
+        .folder-tab:hover { color: var(--tg-text); background: var(--tg-hover); }
+        .folder-tab.active { color: #fff; background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-2)); box-shadow: 0 6px 16px -6px var(--tg-accent); }
+
+        .search-wrapper { padding: 0 14px 10px; flex-shrink: 0; }
+        .search-bar {
+            width: 100%; padding: 11px 16px; border-radius: 16px; outline: none; font-size: .87rem;
+            background: var(--tg-panel); border: 1px solid var(--tg-border); color: var(--tg-text); transition: border-color .2s, box-shadow .2s;
+        }
+        .search-bar:focus { border-color: var(--tg-accent); box-shadow: 0 0 0 3px var(--tg-focus); }
+        .search-bar::placeholder { color: var(--tg-text-muted); }
+
+        /* ============ CHAT LIST ============ */
+        .chats-scroll-list { flex: 1; overflow-y: auto; padding: 2px 8px 90px; }
+        .chat-row-item {
+            display: flex; align-items: center; gap: 12px; padding: 11px 10px; border-radius: 18px; cursor: pointer;
+            position: relative; transition: background .18s, transform .12s;
+        }
+        .chat-row-item:hover { background: var(--tg-hover); }
+        .chat-row-item:active { transform: scale(.985); }
+        .chat-info-content { flex: 1; min-width: 0; }
+        .chat-title-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 600; font-size: .92rem; }
+        .chat-title-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .chat-preview-text { font-size: .8rem; color: var(--tg-text-muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .chats-fab-btn {
+            position: absolute; bottom: 22px; right: 20px; width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer;
+            background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-2)); color: #fff; font-size: 1.5rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; z-index: 40;
+            box-shadow: 0 12px 30px -6px var(--tg-accent); transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+        }
+        .chats-fab-btn:hover { transform: scale(1.08) rotate(90deg); }
+        .chats-fab-btn:active { transform: scale(.92); }
+
+        /* ============ DIALOG HEADER / PINNED ============ */
+        .back-btn { display: none; }
+        .dialog-title-wrap { overflow: hidden; min-width: 0; }
+        .dialog-title { font-weight: 700; font-size: .93rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dialog-sub { font-size: .72rem; color: var(--tg-text-muted); font-weight: 500; transition: color .2s; }
+
+        .pinned-bar {
+            display: none; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; cursor: pointer;
+            padding: 8px 14px; font-size: .78rem; border-bottom: 1px solid var(--tg-border);
+            background: linear-gradient(90deg, var(--tg-hover), transparent);
+        }
+        .pinned-bar.active { display: flex; }
+        .pinned-text { color: var(--tg-accent); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ============ MESSAGES ============ */
+        .messages-scroll-area { flex: 1; overflow-y: auto; padding: 18px 18px 10px; display: flex; flex-direction: column; gap: 9px; }
+        .message-bubble {
+            max-width: min(74%, 560px); padding: 10px 15px; border-radius: 20px; font-size: .9rem; line-height: 1.45;
+            word-break: break-word; position: relative; box-shadow: 0 6px 18px -10px rgba(0,0,0,.7);
+            animation: bubbleIn .26s cubic-bezier(.2,.8,.2,1) both;
+        }
+        @keyframes bubbleIn { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+        .message-bubble.my { align-self: flex-end; background: var(--tg-bubble-my); color: var(--tg-bubble-my-color); border-bottom-right-radius: 6px; }
+        .message-bubble.peer { align-self: flex-start; background: var(--tg-bubble-peer); color: var(--tg-text); border: 1px solid var(--tg-border); border-bottom-left-radius: 6px; }
+        .message-img { max-width: 100%; border-radius: 12px; margin-top: 5px; cursor: pointer; transition: transform .2s; }
+        .message-img:hover { transform: scale(1.02); }
+        .message-reply-quote { background: var(--tg-reply-bg); border-left: 3px solid var(--tg-accent); padding: 4px 8px; border-radius: 8px; font-size: .73rem; margin-bottom: 5px; color: var(--tg-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .message-footer-info { display: flex; align-items: center; justify-content: flex-end; gap: 7px; font-size: .66rem; opacity: .72; margin-top: 5px; }
+        .tts-speaker-btn { cursor: pointer; transition: transform .15s, opacity .15s; }
+        .tts-speaker-btn:hover { transform: scale(1.2); opacity: 1; }
+
+        .messages-empty { margin: auto; text-align: center; color: var(--tg-text-muted); font-size: .86rem; line-height: 1.7; animation: fadeUp .4s ease both; }
+        .messages-empty .big { font-size: 2.6rem; display: block; margin-bottom: 8px; }
+
+        .video-circle-wrap { width: 200px; height: 200px; border-radius: 50%; overflow: hidden; position: relative; margin: 5px 0; background: #000; cursor: pointer; border: 3px solid var(--tg-accent); box-shadow: 0 10px 30px -8px var(--tg-accent); }
+        .video-circle-wrap video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .video-circle-play-btn { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.34); color: #fff; font-size: 2.2rem; transition: opacity .2s; }
+        .video-circle-wrap.playing .video-circle-play-btn { opacity: 0; }
+        .speed-badge { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.7); padding: 2px 8px; border-radius: 10px; font-size: .64rem; font-weight: 700; color: #fff; }
+
+        .voice-player { display: flex; align-items: center; gap: 10px; min-width: 180px; padding: 3px 0; }
+        .voice-play-btn { width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer; flex-shrink: 0; background: var(--tg-accent); color: #fff; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
+        .voice-play-btn:active { transform: scale(.9); }
+        .waveform-bar { flex: 1; height: 24px; display: flex; align-items: center; gap: 2px; }
+        .waveform-stick { flex: 1; background: rgba(255,255,255,.34); border-radius: 2px; min-height: 4px; transition: height .15s, background .15s; }
+        .voice-player.playing .waveform-stick { background: var(--tg-accent); animation: wavePulse .9s ease-in-out infinite alternate; }
+        @keyframes wavePulse { from { opacity: .5; } to { opacity: 1; } }
+
+        .reactions-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+        .reaction-chip { display: flex; align-items: center; gap: 3px; padding: 3px 7px; border-radius: 12px; font-size: .74rem; cursor: pointer; background: var(--tg-chip-bg); border: 1px solid var(--tg-border); transition: transform .14s, background .14s; }
+        .reaction-chip:hover { background: var(--tg-chip-bg); border-color: var(--tg-accent); }
+        .reaction-chip:active { transform: scale(1.18); }
+
+        /* ============ CONTEXT MENU (RIGHT-CLICK) ============ */
+        .message-context-menu {
+            position: fixed; z-index: 9500; min-width: 200px; padding: 6px;
+            background: var(--tg-panel); border: 1px solid var(--tg-border);
+            border-radius: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, .55);
+            backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+            animation: menuIn .16s cubic-bezier(.2, .9, .3, 1.2) both;
+        }
+        @keyframes menuIn { from { opacity: 0; transform: scale(.94) translateY(-5px); } to { opacity: 1; transform: none; } }
+        .message-context-menu button {
+            display: flex; align-items: center; gap: 11px; width: 100%; padding: 9px 12px;
+            border: none; background: transparent; color: var(--tg-text);
+            font-size: .84rem; font-weight: 600; text-align: left; cursor: pointer;
+            border-radius: 9px; transition: background .14s, color .14s, transform .1s;
+        }
+        .message-context-menu button:hover { background: var(--tg-hover); color: var(--tg-accent); }
+        .message-context-menu button:active { transform: scale(.98); }
+        .message-context-menu button.danger { color: #f87171; }
+        .message-context-menu button.danger:hover { background: rgba(239, 68, 68, .16); color: #fca5a5; }
+        .message-context-menu .menu-sep { height: 1px; margin: 5px 8px; background: var(--tg-border); }
+
+        /* ============ MOTION POLISH ============ */
+        .messages-scroll-area { scroll-behavior: smooth; }
+        .message-bubble:hover { filter: brightness(1.07); }
+        .message-bubble:active { transform: scale(.99); }
+        .chat-row-item:hover { transform: translateX(3px); }
+        .message-img { border-radius: 12px; }
+        .action-btn, .theme-option, .attach-item, .ai-suggestion-chip { transition: background .16s, transform .12s, border-color .16s, color .16s, opacity .2s; }
+        .avatar-view { transition: box-shadow .25s, border-color .25s; }
+        .profile-block:hover .avatar-view { box-shadow: 0 8px 20px -6px var(--tg-accent); }
+        button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+
+        /* ============ AI PROMPTS / REPLY ============ */
+        .ai-suggestions-row { display: none; gap: 7px; padding: 8px 14px; overflow-x: auto; flex-shrink: 0; border-top: 1px solid var(--tg-border); scrollbar-width: none; }
+        .ai-suggestions-row::-webkit-scrollbar { display: none; }
+        .ai-suggestion-chip { padding: 6px 13px; border-radius: 14px; font-size: .73rem; font-weight: 600; white-space: nowrap; cursor: pointer; color: var(--tg-accent); background: var(--tg-chip-bg); border: 1px solid var(--tg-border); transition: all .16s; }
+        .ai-suggestion-chip:hover { background: var(--tg-accent); color: #fff; transform: translateY(-1px); }
+
+        .reply-bar-container { display: none; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 14px; flex-shrink: 0; border-top: 1px solid var(--tg-border); background: var(--tg-bg); animation: fadeUp .2s ease both; }
+        .reply-bar-container.active { display: flex; }
+        .reply-label { font-size: .7rem; color: var(--tg-accent); font-weight: 700; }
+        .reply-preview { font-size: .78rem; color: var(--tg-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ============ INPUT PANEL ============ */
+        .input-panel {
+            display: flex; align-items: center; gap: 5px; flex-shrink: 0; position: relative;
+            padding: 9px 12px calc(9px + var(--safe-bottom)); background: var(--tg-bg); border-top: 1px solid var(--tg-border);
+        }
+        .input-panel input[type="text"] {
+            flex: 1; min-width: 0; padding: 12px 18px; border-radius: 26px; outline: none; font-size: .92rem;
+            background: var(--tg-panel); border: 1px solid var(--tg-border); color: var(--tg-text); transition: border-color .2s, box-shadow .2s;
+        }
+        .input-panel input[type="text"]:focus { border-color: var(--tg-accent); box-shadow: 0 0 0 3px var(--tg-focus); }
+        .input-panel input[type="text"]::placeholder { color: var(--tg-text-muted); }
+
+        .send-main-btn {
+            width: 42px; height: 42px; min-width: 42px; border-radius: 50%; border: none; cursor: pointer; color: #fff;
+            background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-2)); font-size: 1.05rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px -6px var(--tg-accent);
+            transition: transform .16s, box-shadow .2s;
+        }
+        .send-main-btn:hover { transform: scale(1.06); }
+        .send-main-btn:active { transform: scale(.9); }
+
+        .input-panel.has-text #sendMsgBtn { display: flex !important; }
+        .input-panel.has-text #voiceRecordBtn, .input-panel.has-text #circleRecordBtn, .input-panel.has-text #sttBtn { display: none !important; }
+        .input-panel:not(.has-text) #sendMsgBtn { display: none !important; }
+        .input-panel:not(.has-text) #voiceRecordBtn, .input-panel:not(.has-text) #circleRecordBtn { display: flex !important; }
+
+        .recording-bar { position: absolute; inset: 0; z-index: 20; display: none; align-items: center; justify-content: space-between; padding: 0 16px calc(var(--safe-bottom)); background: var(--tg-bg); }
+        .recording-bar.active { display: flex; }
+        .live-mic-wave { display: flex; align-items: center; gap: 3px; height: 22px; }
+        .live-mic-bar { width: 3px; height: 6px; border-radius: 2px; background: #ef4444; transition: height .08s; }
+
+        #filePicker, #avatarPicker, #docPicker, #avatarPicker { display: none; }
+
+        /* ============ PANELS ============ */
+        .emoji-panel, .attach-menu {
+            position: absolute; bottom: 66px; z-index: 60; background: var(--tg-panel); border: 1px solid var(--tg-border);
+            border-radius: 18px; box-shadow: var(--tg-shadow); display: none; flex-direction: column; overflow: hidden;
+            backdrop-filter: blur(20px); animation: popIn .18s cubic-bezier(.2,.9,.3,1.2) both;
+        }
+        .emoji-panel { left: 12px; right: 12px; max-height: 230px; }
+        .emoji-panel.active, .attach-menu.active { display: flex; }
+        .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; padding: 10px; overflow-y: auto; }
+        .emoji-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 5px; border-radius: 9px; transition: transform .14s, background .14s; }
+        .emoji-btn:hover { background: var(--tg-hover); transform: scale(1.18); }
+        .attach-menu { left: 12px; min-width: 218px; padding: 7px; gap: 2px; }
+        .attach-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border: none; background: none; cursor: pointer; border-radius: 11px; color: var(--tg-text); font-size: .85rem; font-weight: 500; text-align: left; transition: background .15s, color .15s; }
+        .attach-item:hover { background: var(--tg-hover); color: var(--tg-accent); }
+
+        /* ============ DIALOG EMPTY ============ */
+        .dialog-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: var(--tg-text-muted); }
+        .dialog-empty img { width: 104px; height: 104px; border-radius: 30px; box-shadow: 0 20px 50px -14px var(--tg-accent), 0 0 0 3px rgba(255,255,255,.35); animation: floatY 4s ease-in-out infinite; }
+        .dialog-empty h3 { color: var(--tg-text); font-size: 1.05rem; }
+        .dialog-empty p { font-size: .82rem; max-width: 280px; line-height: 1.6; }
+        .app-container.chat-active .dialog-empty { display: none; }
+
+        /* ============ MODALS ============ */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 18px;
+            background: var(--tg-overlay); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            width: 100%; max-width: 410px; max-height: 88vh; overflow-y: auto; display: flex; flex-direction: column; gap: 13px;
+            padding: 20px; border-radius: 22px; background: var(--tg-panel); border: 1px solid var(--tg-border); box-shadow: var(--tg-shadow);
+            animation: popIn .24s cubic-bezier(.2,.9,.3,1.15) both;
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(.94) translateY(8px); } to { opacity: 1; transform: none; } }
+
+        .modal-title { display: flex; align-items: center; justify-content: space-between; }
+        .modal-title h3 { font-size: 1.08rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+        .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .theme-option { padding: 9px 2px; border-radius: 10px; border: 1px solid var(--tg-border); background: var(--tg-bg); color: var(--tg-text); font-size: .71rem; font-weight: 600; cursor: pointer; text-align: center; transition: all .16s; }
+        .theme-option:hover { border-color: var(--tg-accent); transform: translateY(-2px); }
+
+        .action-btn {
+            display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 13px; font-size: .82rem; font-weight: 600;
+            border-radius: 12px; cursor: pointer; text-align: center; color: var(--tg-accent); background: var(--tg-bg); border: 1px solid var(--tg-border);
+            transition: background .16s, transform .12s, border-color .16s;
+        }
+        .action-btn:hover { background: var(--tg-hover); border-color: var(--tg-accent); }
+        .action-btn:active { transform: scale(.97); }
+
+        .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--tg-border); }
+        .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch .slider { position: absolute; inset: 0; cursor: pointer; border-radius: 99px; background: var(--tg-border); transition: background .2s; }
+        .switch .slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: transform .22s; }
+        .switch input:checked + .slider { background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-2)); }
+        .switch input:checked + .slider::before { transform: translateX(20px); }
+
+        .info-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px; font-size: .79rem; border-radius: 12px; background: var(--tg-bg); border: 1px solid var(--tg-border); }
+
+        .circle-modal-card { max-width: 330px !important; text-align: center; }
+        .circle-preview-wrapper { position: relative; width: min(190px, 40vh, 56vw); height: min(190px, 40vh, 56vw); margin: 6px auto; border-radius: 50%; overflow: hidden; border: 4px solid var(--tg-accent); box-shadow: 0 0 30px rgba(0,0,0,.35); flex-shrink: 0; }
+        .circle-preview-wrapper video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .circle-rec-pulse { position: absolute; inset: 0; border-radius: 50%; border: 2px solid #ef4444; animation: recPulse 1.6s infinite; pointer-events: none; }
+        @keyframes recPulse { 0% { transform: scale(1); opacity: .8; } 50% { transform: scale(1.06); opacity: .15; } 100% { transform: scale(1); opacity: .8; } }
+
+        .call-video-box { width: 100%; height: 280px; background: #000; border-radius: 16px; position: relative; overflow: hidden; display: none; align-items: center; justify-content: center; }
+        .call-video-box video { width: 100%; height: 100%; object-fit: cover; }
+        .call-local-video { position: absolute; bottom: 10px; right: 10px; width: 78px; height: 104px; border-radius: 12px; object-fit: cover; border: 2px solid var(--tg-accent); }
+
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 240px; margin: 10px auto; }
+        .game-cell { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; cursor: pointer; border-radius: 12px; background: var(--tg-bg); border: 2px solid var(--tg-border); transition: all .16s; }
+        .game-cell:hover { border-color: var(--tg-accent); transform: scale(1.03); }
+
+        /* ============ TOAST ============ */
+        .toast-notice {
+            position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(18px); z-index: 6000;
+            padding: 10px 18px; border-radius: 14px; font-size: .82rem; font-weight: 500; color: #fff;
+            background: var(--tg-panel); color: var(--tg-text); border: 1px solid var(--tg-border); box-shadow: 0 16px 40px rgba(0,0,0,.35);
+            opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; max-width: 80vw; text-align: center;
+        }
+        .toast-notice.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+
+        /* ============ SPLASH ============ */
+        .splash { position: fixed; inset: 0; z-index: 8000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: var(--tg-hero); transition: opacity .5s ease, visibility .5s; }
+        .splash.hidden { opacity: 0; visibility: hidden; }
+        .splash img { width: 108px; height: 108px; border-radius: 32px; box-shadow: 0 30px 70px -16px var(--tg-accent), 0 0 0 3px rgba(255,255,255,.35); animation: floatY 3s ease-in-out infinite; }
+        .splash h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: .3px; background: linear-gradient(120deg, var(--tg-accent), var(--tg-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .splash .sub { color: var(--tg-text-muted); font-size: .8rem; }
+        .splash .loader { width: 130px; height: 4px; border-radius: 99px; background: var(--tg-border); overflow: hidden; }
+        .splash .loader::after { content: ""; display: block; width: 40%; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--tg-accent), var(--tg-accent-2)); animation: slideLoad 1.1s ease-in-out infinite; }
+        @keyframes slideLoad { 0% { transform: translateX(-100%); } 100% { transform: translateX(330%); } }
+        @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+
+        /* ============ WELCOME ============ */
+        .welcome-overlay {
+            position: fixed; inset: 0; z-index: 7000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 26px;
+            background: var(--tg-hero);
+        }
+        .welcome-overlay.open { display: flex; }
+        .welcome-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+        .welcome-card img { width: 122px; height: 122px; border-radius: 34px; box-shadow: 0 30px 70px -16px var(--tg-accent), 0 0 0 3px rgba(255,255,255,.4); animation: floatY 3.4s ease-in-out infinite; }
+        .welcome-card h1 { font-size: 1.7rem; font-weight: 800; background: linear-gradient(120deg, var(--tg-accent), var(--tg-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .welcome-card p { color: var(--tg-text-muted); font-size: .86rem; line-height: 1.6; }
+        .welcome-card .field { width: 100%; position: relative; }
+        .welcome-card input { width: 100%; padding: 14px 16px; border-radius: 14px; font-size: .95rem; outline: none; background: var(--tg-panel); border: 1px solid var(--tg-border); color: var(--tg-text); transition: border-color .2s, box-shadow .2s; }
+        .welcome-card input:focus { border-color: var(--tg-accent); box-shadow: 0 0 0 4px var(--tg-focus); }
+        .welcome-hint { font-size: .74rem; color: var(--tg-text-muted); min-height: 16px; }
+        .welcome-error { color: #f87171; font-size: .78rem; min-height: 16px; }
+
+        /* ============ MOBILE / NARROW ============ */
+        @media (max-width: 719px) {
+            .view-chats { position: absolute; inset: 0; width: 100%; flex: 0 0 100%; border-right: none; }
+            .view-dialog { position: absolute; inset: 0; transform: translateX(100%); transition: transform .32s cubic-bezier(.2,.8,.2,1); will-change: transform; }
+            .app-container.chat-active .view-chats { transform: translateX(-25%); filter: brightness(.45); pointer-events: none; }
+            .app-container.chat-active .view-dialog { transform: translateX(0); }
+            .dialog-empty { display: none !important; }
+            .back-btn { display: flex; }
+            .message-bubble { max-width: 86%; }
+            .tb-brand span { display: none; }
+        }
+    </style>
+</head>
+<body data-theme="puppy">
+
+<canvas id="confettiCanvas"></canvas>
+
+<!-- DESKTOP TITLEBAR -->
+<header class="desktop-titlebar" id="desktopTitlebar">
+    <div class="tb-brand">
+        <img src="logo.png" alt="TailGram">
+        <b>TailGram</b><span>Ультра Мессенджер</span>
+    </div>
+    <div class="tb-controls">
+        <button class="tb-btn" id="winMin" title="Свернуть">&#8211;</button>
+        <button class="tb-btn" id="winMax" title="Развернуть">&#9723;</button>
+        <button class="tb-btn close" id="winClose" title="Закрыть">&#10005;</button>
+    </div>
+</header>
+
+<div class="app-container" id="appRoot">
+    <!-- ============ CHATS PANE ============ -->
+    <aside class="view-chats">
+        <div class="app-header">
+            <div class="profile-block" onclick="document.getElementById('avatarPicker').click()" title="Сменить фото">
+                <div class="avatar-view" id="myAvatarBox"><img src="logo.png" alt="Мой аватар"></div>
+                <div style="min-width:0;">
+                    <div style="font-weight:700; font-size:.95rem; display:flex; align-items:center; gap:6px;">
+                        <span id="myNickLabel">Пользователь</span>
+                        <span id="myStatusDot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#eab308; box-shadow:0 0 8px currentColor;"></span>
+                    </div>
+                    <div style="font-size:.72rem; color:var(--tg-accent); cursor:pointer; font-weight:600;" onclick="event.stopPropagation(); AppManager.copyMyId()">
+                        ID: <span id="myPeerIdLabel">...</span> &#128203;
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-action-btn" onclick="AppManager.openAddContactModal()" title="Добавить контакт">&#10133;</button>
+                <div class="star-counter" onclick="AppManager.ui.openModal('starsModal')">&#11088; <span id="myStarsVal">200</span></div>
+                <button class="icon-action-btn" id="adminBtn" onclick="AppManager.openAdminPanel()" title="Админ-панель" style="display:none; color:var(--tg-accent);">&#128081;</button>
+                <button class="icon-action-btn" onclick="AppManager.ui.openModal('settingsModal')" title="Настройки">&#9881;&#65039;</button>
+            </div>
+            <input type="file" id="avatarPicker" accept="image/*" onchange="AppManager.uploadAvatar(event)">
+        </div>
+
+        <div class="stories-bar" id="storiesBar"></div>
+
+        <div class="folder-tabs">
+            <div class="folder-tab active" onclick="AppManager.switchFolder('all', this)">Все чаты</div>
+            <div class="folder-tab" onclick="AppManager.switchFolder('personal', this)">Личные</div>
+            <div class="folder-tab" onclick="AppManager.switchFolder('groups', this)">👥 Группы</div>
+            <div class="folder-tab" onclick="AppManager.switchFolder('channels', this)">📢 Каналы</div>
+            <div class="folder-tab" onclick="AppManager.switchFolder('bots', this)">Боты</div>
+            <div class="folder-tab" onclick="AppManager.switchFolder('saved', this)">Избранное</div>
+        </div>
+
+        <div class="search-wrapper">
+            <input type="text" class="search-bar" id="searchBox" placeholder="🔍 Поиск контактов и сообщений..." oninput="AppManager.renderChats()">
+        </div>
+
+        <div class="chats-scroll-list" id="chatsListContainer"></div>
+        <button class="chats-fab-btn" onclick="AppManager.openAddContactModal()" title="Добавить контакт">&#10133;</button>
+    </aside>
+
+    <!-- ============ DIALOG PANE ============ -->
+    <section class="view-dialog" id="dialogView">
+        <div class="dialog-inner">
+            <div class="app-header">
+                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                    <button class="icon-action-btn back-btn" style="font-size:1.5rem;" onclick="AppManager.closeChat()">&#8249;</button>
+                    <div class="profile-block">
+                        <div class="avatar-view" id="activeAvatarBox">?</div>
+                        <div class="dialog-title-wrap">
+                            <div class="dialog-title" id="activeTitleBox">Чат</div>
+                            <div class="dialog-sub" id="activeSubtitleBox">офлайн</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:3px; align-items:center;">
+                    <button class="icon-action-btn" onclick="AppManager.startCall(false)" title="Аудиозвонок">&#128222;</button>
+                    <button class="icon-action-btn" onclick="AppManager.startCall(true)" title="Видеозвонок">&#128249;</button>
+                    <button class="icon-action-btn" onclick="AppManager.ui.openModal('giftsModal')" title="Подарок">&#127873;</button>
+                    <button class="icon-action-btn" onclick="AppManager.reconnectActiveChat()" title="Обновить">&#128260;</button>
+                </div>
+            </div>
+
+            <div class="pinned-bar" id="pinnedBar" onclick="AppManager.showToast('📌 Закреплённое сообщение')">
+                <div style="display:flex; align-items:center; gap:7px; overflow:hidden;">
+                    <span>📌</span><span class="pinned-text" id="pinnedText">Сообщение</span>
+                </div>
+                <button class="icon-action-btn" style="font-size:.85rem; width:28px; height:28px;" onclick="event.stopPropagation(); AppManager.unpinMessage()">&#10005;</button>
+            </div>
+
+            <div id="channelNotice" style="display:none; text-align:center; padding:10px 14px; font-size:.78rem; color:var(--tg-text-muted); border-bottom:1px solid var(--tg-border);">🔒 Это канал в режиме чтения — публиковать может только создатель</div>
+
+            <div class="messages-scroll-area" id="messagesArea"></div>
+
+            <div class="ai-suggestions-row" id="aiPromptsRow">
+                <div class="ai-suggestion-chip" onclick="AppManager.sendAiPreset('💡 Придумай 3 крутые идеи для мобильного приложения')">💡 Идеи на 2026</div>
+                <div class="ai-suggestion-chip" onclick="AppManager.sendAiPreset('💻 Напиши скрипт для адаптивной вёрстки на телефоне')">💻 Скрипт JS</div>
+                <div class="ai-suggestion-chip" onclick="AppManager.sendAiPreset('🎲 Загадай интересную загадку')">🎲 Загадка</div>
+                <div class="ai-suggestion-chip" onclick="AppManager.startTicTacToe()">❌⭕ Играть</div>
+            </div>
+
+            <div class="reply-bar-container" id="replyBar">
+                <div style="overflow:hidden; min-width:0;">
+                    <div class="reply-label">Ответ:</div>
+                    <div class="reply-preview" id="replyPreviewText">...</div>
+                </div>
+                <button class="icon-action-btn" style="font-size:.9rem; width:28px; height:28px;" onclick="AppManager.cancelReply()">&#10005;</button>
+            </div>
+
+            <div class="input-panel">
+                <div class="attach-menu" id="attachMenu">
+                    <button class="attach-item" onclick="document.getElementById('filePicker').click(); AppManager.toggleAttachMenu();">🖼️ Фотография</button>
+                    <button class="attach-item" onclick="AppManager.openStoryComposer(); AppManager.toggleAttachMenu();">📸 История на 24 ч</button>
+                    <button class="attach-item" onclick="document.getElementById('docPicker').click(); AppManager.toggleAttachMenu();">📁 Документ / Файл</button>
+                    <button class="attach-item" onclick="AppManager.toggleSpeechToText(); AppManager.toggleAttachMenu();">🗣️ Голосовой ввод</button>
+                    <button class="attach-item" onclick="AppManager.sendDice('🎲'); AppManager.toggleAttachMenu();">🎲 Бросить кубик</button>
+                    <button class="attach-item" onclick="AppManager.sendDice('🎯'); AppManager.toggleAttachMenu();">🎯 Дартс</button>
+                    <button class="attach-item" onclick="AppManager.startTicTacToe(); AppManager.toggleAttachMenu();">❌⭕ Крестики-Нолики</button>
+                </div>
+
+                <div class="emoji-panel" id="emojiPanel">
+                    <div class="emoji-grid" id="emojiGrid"></div>
+                </div>
+
+                <div class="recording-bar" id="recordingBar">
+                    <div style="display:flex; align-items:center; gap:9px;">
+                        <div style="width:10px; height:10px; border-radius:50%; background:#ef4444; animation:recPulse 1.4s infinite;"></div>
+                        <span id="recordTimerLabel" style="font-size:.85rem; font-weight:700; color:#ef4444;">00:00</span>
+                        <div class="live-mic-wave" id="liveWave">
+                            <div class="live-mic-bar"></div><div class="live-mic-bar"></div><div class="live-mic-bar"></div>
+                            <div class="live-mic-bar"></div><div class="live-mic-bar"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="action-btn" style="padding:7px 12px; font-size:.75rem;" onclick="AppManager.cancelVoiceRecord()">Отмена</button>
+                        <button class="send-main-btn" style="width:36px; height:36px; font-size:.95rem;" onclick="AppManager.stopAndSendVoice()">✓</button>
+                    </div>
+                </div>
+
+                <button class="icon-action-btn" onclick="AppManager.toggleAttachMenu()" title="Прикрепить">&#128206;</button>
+                <button class="icon-action-btn" onclick="AppManager.toggleEmojiPanel()" title="Смайлы">&#128522;</button>
+
+                <input type="file" id="filePicker" accept="image/*" onchange="AppManager.sendImage(event)">
+                <input type="file" id="docPicker" onchange="AppManager.sendDocument(event)">
+
+                <input type="text" id="msgInputBox" placeholder="Написать сообщение..." oninput="AppManager.onInputBoxChange()" onkeydown="if(event.key==='Enter') AppManager.sendText()">
+
+                <button class="icon-action-btn" id="sttBtn" onclick="AppManager.toggleSpeechToText()" title="Голосовой ввод">&#128483;&#65039;</button>
+                <button class="icon-action-btn" id="voiceRecordBtn" onclick="AppManager.startVoiceRecord()" title="Голосовое сообщение">&#127908;</button>
+                <button class="icon-action-btn" id="circleRecordBtn" onclick="AppManager.startVideoCircleRecord()" title="Видео-кружочек">&#127909;</button>
+                <button class="send-main-btn" id="sendMsgBtn" onclick="AppManager.sendText()" title="Отправить">&#10148;</button>
+            </div>
+        </div>
+
+        <div class="dialog-empty">
+            <img src="logo.png" alt="TailGram">
+            <h3>Добро пожаловать в TailGram</h3>
+            <p>Выберите чат слева или создайте новый контакт, чтобы начать общение. 🐾 Ваши сообщения защищены P2P-шифрованием.</p>
+        </div>
+    </section>
+</div>
+
+<!-- ============ MODAL: SETTINGS ============ -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <h3>⚙️ Настройки</h3>
+            <button class="icon-action-btn" onclick="AppManager.ui.closeModal('settingsModal')">&#10005;</button>
+        </div>
+
+        <div style="font-size:.78rem; color:var(--tg-text-muted); font-weight:700;">Тема оформления</div>
+        <div class="theme-grid">
+            <button class="theme-option" onclick="AppManager.setTheme('puppy')">🐾 Puppy</button>
+            <button class="theme-option" onclick="AppManager.setTheme('dark')">Midnight</button>
+            <button class="theme-option" onclick="AppManager.setTheme('matrix')">Matrix</button>
+            <button class="theme-option" onclick="AppManager.setTheme('cyberpunk')">Cyberpunk</button>
+            <button class="theme-option" onclick="AppManager.setTheme('amoled')">AMOLED</button>
+            <button class="theme-option" onclick="AppManager.setTheme('ocean')">Ocean</button>
+            <button class="theme-option" onclick="AppManager.setTheme('sunset')">Sunset</button>
+            <button class="theme-option" onclick="AppManager.setTheme('emerald')">Emerald</button>
+            <button class="theme-option" onclick="AppManager.setTheme('sakura')">Sakura</button>
+        </div>
+
+        <div class="settings-row">
+            <span style="font-size:.85rem; font-weight:600;">🔊 Звуки уведомлений</span>
+            <label class="switch"><input type="checkbox" id="soundToggle" checked onchange="AppManager.toggleSound(this.checked)"><span class="slider"></span></label>
+        </div>
+
+        <button class="action-btn" id="settingsAdminBtn" style="width:100%; display:none; color:#facc15; border-color:rgba(250,204,21,.4);" onclick="AppManager.ui.closeModal('settingsModal'); AppManager.openAdminPanel();">👑 Админ-панель</button>
+        <button class="send-main-btn" style="width:100%; border-radius:12px; height:42px;" onclick="AppManager.editNick()">✏️ Изменить никнейм</button>
+        <button class="action-btn" style="width:100%;" onclick="AppManager.ui.closeModal('settingsModal'); AppManager.openStoryComposer();">📸 Выставить историю (24 ч)</button>
+        <button class="action-btn" style="width:100%;" onclick="AppManager.ui.closeModal('settingsModal'); AppManager.openAddContactModal();">➕ Добавить контакт</button>
+        <button class="action-btn" style="width:100%;" onclick="AppManager.copyMyId()">📋 Скопировать мой ID (@<span id="settingsIdVal">...</span>)</button>
+        <a id="downloadExeLink" href="TailGram.exe" download="TailGram.exe" class="action-btn" style="width:100%; text-decoration:none; color:var(--tg-accent);">💻 Скачать TailGram для ПК (.exe)</a>
+        <button class="action-btn" style="width:100%;" onclick="AppManager.openSecondTab()">👥 Открыть 2-й профиль для теста</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: ADMIN PANEL ============ -->
+<div class="modal-overlay" id="adminModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <h3><span>👑</span> Админ-панель</h3>
+            <button class="icon-action-btn" onclick="AppManager.ui.closeModal('adminModal')">&#10005;</button>
+        </div>
+        <div style="font-size:.84rem; color:var(--tg-text-muted); line-height:1.5;">Введите никнейм или ID пользователя, чтобы заблокировать его:</div>
+        <input type="text" id="adminBanInput" class="search-bar" placeholder="Например: алексей или dima_123" style="padding:12px 14px;" onkeydown="if(event.key==='Enter') AppManager.banUserFromInput()">
+        <button class="send-main-btn" style="width:100%; border-radius:12px; height:auto; padding:12px; background:linear-gradient(135deg,#ef4444,#b91c1c); box-shadow:0 8px 20px -6px #ef4444;" onclick="AppManager.banUserFromInput()">🚫 Забанить пользователя</button>
+        <div id="adminMemberList" style="display:flex; flex-direction:column; gap:4px;"></div>
+        <div id="adminBannedList" style="display:flex; flex-direction:column; gap:4px;"></div>
+    </div>
+</div>
+
+<!-- ============ MODAL: ADD CONTACT ============ -->
+<div class="modal-overlay" id="addContactModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <h3><span>👤➕</span> Добавить контакт</h3>
+            <button class="icon-action-btn" onclick="AppManager.ui.closeModal('addContactModal')">&#10005;</button>
+        </div>
+        <div style="font-size:.84rem; color:var(--tg-text-muted); line-height:1.5;">Введите никнейм или ID собеседника для начала диалога:</div>
+        <input type="text" id="newContactInput" class="search-bar" placeholder="Например: dima_2026 или алексей" style="padding:12px 14px;" onkeydown="if(event.key==='Enter') AppManager.confirmAddContact()">
+        <div class="info-chip">
+            <div><span style="color:var(--tg-text-muted);">Ваш ID:</span> <strong style="color:var(--tg-accent); margin-left:4px;" id="addContactMyId">...</strong></div>
+            <button class="action-btn" style="padding:5px 10px; font-size:.74rem;" onclick="AppManager.copyMyId()">Скопировать</button>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+            <button class="action-btn" style="flex:1;" onclick="AppManager.openCreateChatModal('group')">👥 Группа</button>
+            <button class="action-btn" style="flex:1;" onclick="AppManager.openCreateChatModal('channel')">📢 Канал</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button class="action-btn" style="flex:1;" onclick="AppManager.ui.closeModal('addContactModal')">Отмена</button>
+            <button class="send-main-btn" style="flex:2; width:auto; border-radius:12px; height:auto; padding:11px;" onclick="AppManager.confirmAddContact()">Добавить ✓</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL: CREATE CHAT (GROUP / CHANNEL) ============ -->
+<div class="modal-overlay" id="createChatModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <h3 id="createChatTitle">👥 Создать группу</h3>
+            <button class="icon-action-btn" onclick="AppManager.ui.closeModal('createChatModal')">&#10005;</button>
+        </div>
+        <input type="text" id="createChatName" class="search-bar" placeholder="Название группы или канала..." style="padding:12px 16px;" onkeydown="if(event.key==='Enter') AppManager.createChat()">
+        <div style="font-size:.72rem; color:var(--tg-text-muted); font-weight:700;">Аватар (эмодзи)</div>
+        <div class="emoji-grid" id="createChatAvatars" style="grid-template-columns:repeat(10, 1fr);"></div>
+        <div id="createChatMembers" style="max-height:170px; overflow-y:auto;"></div>
+        <div class="welcome-error" id="createChatError"></div>
+        <button class="send-main-btn" style="width:100%; border-radius:14px; height:auto; padding:12px;" onclick="AppManager.createChat()">Создать ✓</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: STARS ============ -->
+<div class="modal-overlay" id="starsModal">
+    <div class="modal-box" style="text-align:center;">
+        <div style="font-size:3rem;">⭐</div>
+        <h3 style="font-weight:700; font-size:1.2rem;">Telegram Stars</h3>
+        <p style="color:var(--tg-text-muted); font-size:.85rem;">Премиум-валюта для подарков и игр.</p>
+        <div style="background:var(--tg-bg); padding:13px; border-radius:14px; font-weight:800; font-size:1.4rem; color:#facc15; border:1px solid rgba(250,204,21,.3);">Баланс: <span id="modalStarsVal">200</span> ⭐</div>
+        <button class="send-main-btn" style="width:100%; border-radius:12px; height:auto; padding:12px; background:linear-gradient(135deg,#f59e0b,#eab308);" onclick="AppManager.spinWheelBonus()">🎰 Колесо фортуны (+50...150 ⭐)</button>
+        <button class="action-btn" style="width:100%;" onclick="AppManager.ui.openModal('giftsModal'); AppManager.ui.closeModal('starsModal');">🎁 Магазин подарков</button>
+        <button class="action-btn" style="width:100%; border:none;" onclick="AppManager.ui.closeModal('starsModal')">Закрыть</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: GIFTS ============ -->
+<div class="modal-overlay" id="giftsModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <h3>🎁 Магазин подарков</h3>
+            <button class="icon-action-btn" onclick="AppManager.ui.closeModal('giftsModal')">&#10005;</button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:9px;">
+            <div class="action-btn" style="flex-direction:column; gap:2px; padding:12px 4px;" onclick="AppManager.sendGift('🌟','Звезда',10)"><span style="font-size:1.8rem;">🌟</span><span style="font-size:.74rem;">Звезда</span><span style="font-size:.68rem; color:#facc15;">10 ⭐</span></div>
+            <div class="action-btn" style="flex-direction:column; gap:2px; padding:12px 4px;" onclick="AppManager.sendGift('🎁','Сюрприз',25)"><span style="font-size:1.8rem;">🎁</span><span style="font-size:.74rem;">Бокс</span><span style="font-size:.68rem; color:#facc15;">25 ⭐</span></div>
+            <div class="action-btn" style="flex-direction:column; gap:2px; padding:12px 4px;" onclick="AppManager.sendGift('🏆','Кубок',50)"><span style="font-size:1.8rem;">🏆</span><span style="font-size:.74rem;">Трофей</span><span style="font-size:.68rem; color:#facc15;">50 ⭐</span></div>
+            <div class="action-btn" style="flex-direction:column; gap:2px; padding:12px 4px;" onclick="AppManager.sendGift('💎','Алмаз',75)"><span style="font-size:1.8rem;">💎</span><span style="font-size:.74rem;">Алмаз</span><span style="font-size:.68rem; color:#facc15;">75 ⭐</span></div>
+            <div class="action-btn" style="flex-direction:column; gap:2px; padding:12px 4px;" onclick="AppManager.sendGift('🚀','Ракета',100)"><span style="font-size:1.8rem;">🚀</span><span style="font-size:.74rem;">Ракета</span><span style="font-size:.68rem; color:#facc15;">100 ⭐</span></div>
+            <div class="action-btn" style="flex-direction:column; gap:2px; padding:12px 4px;" onclick="AppManager.sendGift('👑','Корона',150)"><span style="font-size:1.8rem;">👑</span><span style="font-size:.74rem;">Корона</span><span style="font-size:.68rem; color:#facc15;">150 ⭐</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL: CALL ============ -->
+<div class="modal-overlay" id="callModal">
+    <div class="modal-box" style="text-align:center;">
+        <h3 id="callModalTitle" style="font-weight:700; font-size:1rem;">Звонок...</h3>
+        <div id="callModalTimer" style="font-size:1.1rem; font-weight:700; color:#22c55e;">00:00</div>
+        <div class="call-video-box" id="callVideoBox">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <video id="localVideo" class="call-local-video" autoplay playsinline muted></video>
+        </div>
+        <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+            <button id="callMuteAudioBtn" class="action-btn" onclick="AppManager.toggleMuteAudio()">🎤 Микрофон</button>
+            <button id="callMuteVideoBtn" class="action-btn" onclick="AppManager.toggleMuteVideo()">📹 Камера</button>
+            <button id="callFlipCamBtn" class="action-btn" onclick="AppManager.flipCallCamera()">🔄 Перевернуть</button>
+            <button class="send-main-btn" style="background:#ef4444; width:auto; border-radius:12px; height:auto; padding:10px 18px;" onclick="AppManager.endCall()">Завершить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL: INCOMING CALL ============ -->
+<div class="modal-overlay" id="incomingCallModal">
+    <div class="modal-box" style="text-align:center;">
+        <div style="font-size:3rem; animation:floatY 1.6s ease-in-out infinite;">📞</div>
+        <h3 style="font-weight:700;">Входящий звонок</h3>
+        <p id="incomingCallerText" style="color:var(--tg-text-muted); font-size:.9rem;"></p>
+        <div style="display:flex; gap:10px;">
+            <button class="send-main-btn" style="flex:1; width:auto; border-radius:12px; height:auto; padding:12px; background:#22c55e;" onclick="AppManager.acceptCall()">Принять</button>
+            <button class="send-main-btn" style="flex:1; width:auto; border-radius:12px; height:auto; padding:12px; background:#ef4444;" onclick="AppManager.rejectCall()">Сбросить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL: VIDEO CIRCLE ============ -->
+<div class="modal-overlay" id="videoCircleModal">
+    <div class="modal-box circle-modal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div style="font-weight:700; font-size:.95rem; display:flex; align-items:center; gap:6px;"><span>🎥</span> Кружочек TailGram</div>
+            <button class="icon-action-btn" onclick="AppManager.flipCircleCamera()" title="Сменить камеру">🔄</button>
+        </div>
+        <div class="circle-preview-wrapper">
+            <video id="circleRecordPreview" autoplay playsinline muted></video>
+            <div class="circle-rec-pulse"></div>
+        </div>
+        <div id="circleRecordTimer" style="font-size:1.05rem; font-weight:700; color:#ef4444; letter-spacing:1px;">00:00 / 01:00</div>
+        <div style="display:flex; gap:10px; width:100%;">
+            <button class="action-btn" style="flex:1; height:42px; border-radius:12px;" onclick="AppManager.cancelCircleRecord()">Отмена</button>
+            <button class="send-main-btn" style="flex:1.2; width:auto; height:42px; border-radius:12px;" onclick="AppManager.stopAndSendCircle()">✓ Отправить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL: GAME ============ -->
+<div class="modal-overlay" id="gameModal">
+    <div class="modal-box" style="text-align:center;">
+        <div class="modal-title">
+            <h3>❌⭕ Крестики-Нолики</h3>
+            <button class="icon-action-btn" onclick="AppManager.ui.closeModal('gameModal')">&#10005;</button>
+        </div>
+        <div id="gameStatusText" style="font-size:.85rem; color:var(--tg-accent); font-weight:600;">Ваш ход (X)</div>
+        <div class="game-grid" id="gameGrid"></div>
+        <button class="action-btn" style="width:100%;" onclick="AppManager.initTicTacToe()">🔄 Заново</button>
+    </div>
+</div>
+
+<!-- ============ MODAL: STORY COMPOSER ============ -->
+<div class="modal-overlay" id="storyComposerModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <h3>📸 Новая история</h3>
+            <button class="icon-action-btn" onclick="AppManager.closeStoryComposer()">&#10005;</button>
+        </div>
+        <div class="story-compose-preview" id="storyComposerPreview"><span style="color:var(--tg-text-muted); font-size:.82rem;">Добавьте фото или напишите текст</span></div>
+        <input type="file" id="storyImagePicker" accept="image/*" style="display:none;" onchange="AppManager.onStoryImagePicked(event)">
+        <div style="display:flex; gap:8px;">
+            <button class="action-btn" style="flex:1;" onclick="document.getElementById('storyImagePicker').click()">🖼️ Фото</button>
+            <button class="action-btn" style="flex:1;" onclick="AppManager.clearStoryImage()">🗑️ Убрать фото</button>
+        </div>
+        <textarea id="storyCaptionInput" class="search-bar" placeholder="Подпись или текст истории..." rows="3" style="resize:none; padding:12px 14px; font-family:inherit;"></textarea>
+        <div class="info-chip" style="font-size:.72rem; color:var(--tg-text-muted);">
+            <span>🔒 Историю увидят только те, с кем вы уже общались. Она исчезнет через 24 часа.</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button class="action-btn" style="flex:1;" onclick="AppManager.closeStoryComposer()">Отмена</button>
+            <button class="send-main-btn" style="flex:2; width:auto; border-radius:12px; height:auto; padding:12px;" onclick="AppManager.postStory()">Опубликовать на 24 ч</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL: STORY VIEWER ============ -->
+<div class="modal-overlay" id="storyViewerModal" style="background:rgba(3,6,12,.92);">
+    <div class="story-viewer">
+        <div class="story-progress-row" id="storyProgressRow"></div>
+        <div class="story-viewer-head">
+            <div class="avatar-view" id="storyViewerAvatar">?</div>
+            <div style="flex:1; min-width:0;">
+                <div class="sv-name" id="storyViewerName">—</div>
+                <div class="sv-time" id="storyViewerTime"></div>
+            </div>
+            <span class="story-viewer-meta" id="storyViewerMeta"></span>
+            <button class="icon-action-btn" style="color:#fff;" onclick="AppManager.closeStoryViewer()">&#10005;</button>
+        </div>
+        <div class="story-viewer-body" id="storyViewerBody">
+            <div class="story-slide" id="storyViewerSlide"></div>
+            <div class="story-viewer-nav left" onclick="AppManager.storyViewerPrev()"></div>
+            <div class="story-viewer-nav right" onclick="AppManager.storyViewerNext()"></div>
+        </div>
+        <div class="story-viewer-footer">
+            <button class="action-btn" style="border-radius:10px;" onclick="AppManager.storyViewerPrev()">&#8249; Назад</button>
+            <button class="action-btn" id="storyDeleteBtn" style="border-radius:10px; display:none; color:#fca5a5;" onclick="AppManager.deleteCurrentStory()">🗑️ Удалить</button>
+            <button class="action-btn" style="border-radius:10px;" onclick="AppManager.storyViewerNext()">Далее &#8250;</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MODAL: STORY ============ -->
+<div class="modal-overlay" id="storyModal" onclick="AppManager.ui.closeModal('storyModal')">
+    <div class="modal-box" style="max-width:350px; text-align:center; padding:12px; background:rgba(0,0,0,.96);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span id="storyAuthorLabel" style="font-weight:700; font-size:.9rem;">История</span>
+            <button class="icon-action-btn" style="width:28px; height:28px;">&#10005;</button>
+        </div>
+        <img id="storyImage" src="" style="width:100%; height:340px; object-fit:cover; border-radius:14px;">
+        <p id="storyCaption" style="font-size:.85rem; margin-top:8px; line-height:1.5; color:#fff;"></p>
+    </div>
+</div>
+
+<audio id="remoteAudio" autoplay playsinline></audio>
+<div id="toastNotice" class="toast-notice"></div>
+
+<!-- ============ SPLASH ============ -->
+<div class="splash" id="splashScreen">
+    <img src="logo.png" alt="TailGram">
+    <h1>TailGram</h1>
+    <div class="sub">🐾 Ультра мессенджер нового поколения 🐾</div>
+    <div class="loader"></div>
+</div>
+
+<!-- ============ WELCOME ============ -->
+<div class="welcome-overlay" id="welcomeScreen">
+    <div class="welcome-card">
+        <img src="logo.png" alt="TailGram">
+        <h1 id="welcomeTitle">Добро пожаловать</h1>
+        <p id="welcomeSubtitle">Придумайте никнейм — на его основе будет создан ваш уникальный ID для связи с друзьями.</p>
+        <div class="field">
+            <input type="text" id="welcomeNickInput" placeholder="Ваш никнейм..." maxlength="24" autocomplete="off">
+        </div>
+        <div class="welcome-hint" id="welcomeHint"></div>
+        <div class="welcome-error" id="welcomeError"></div>
+        <button class="send-main-btn" id="welcomeBtn" style="width:100%; border-radius:14px; height:auto; padding:14px; font-size:.95rem;">Начать общение &#10148;</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script src="desktop.js"></script>
+</body>
+</html>
