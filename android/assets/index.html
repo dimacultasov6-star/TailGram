@@ -130,7 +130,7 @@
             background: var(--tg-bg); overflow: hidden;
         }
         .view-chats {
-            width: 372px; flex: 0 0 372px; display: flex; flex-direction: column; min-height: 0;
+            width: min(372px, 100%); flex: 0 0 min(372px, 100%); display: flex; flex-direction: column; min-height: 0;
             background: var(--tg-bg); border-right: 1px solid var(--tg-border); position: relative; z-index: 2;
         }
         .view-dialog {
@@ -1068,10 +1068,20 @@
         var list = root.querySelector('.view-chats');
         var dlg = root.querySelector('.view-dialog');
         if (!list || !dlg) return;
-        var z = parseFloat(document.documentElement.style.zoom || '1');
-        if (!z || z <= 0 || !isFinite(z)) z = 1;
-        var vw = (document.documentElement.clientWidth || window.innerWidth) / z;
-        var vh = (document.documentElement.clientHeight || window.innerHeight) / z;
+        /* Если WebView не подхватил viewport (страница шире экрана) -- вписываем
+           интерфейс в видимую область, чтобы правый край не обрезался. */
+        var de = document.documentElement;
+        var visW = (window.visualViewport && window.visualViewport.width) || window.innerWidth || de.clientWidth;
+        var scale = 1;
+        if (de.clientWidth > 0 && visW > 0) {
+            scale = visW / de.clientWidth;
+            if (!isFinite(scale) || scale <= 0) scale = 1;
+            scale = Math.min(1, Math.max(0.4, scale));
+        }
+        root.style.setProperty('transform-origin', '0 0', 'important');
+        root.style.setProperty('transform', scale < 0.999 ? 'scale(' + scale + ')' : '', 'important');
+        var vw = de.clientWidth, vh = de.clientHeight || window.innerHeight;
+        if (scale < 0.999) { vh = vh / scale; }
         box(list, vw, vh);
         box(dlg, vw, vh);
         dlg.style.setProperty('transform-origin', '0 0', 'important');
@@ -1120,6 +1130,9 @@
     window.addEventListener('load', hook);
     window.addEventListener('resize', function () { if (forced) layout(); });
     window.addEventListener('orientationchange', function () { setTimeout(hook, 250); });
+    if (window.visualViewport && window.visualViewport.addEventListener) {
+        window.visualViewport.addEventListener('resize', function () { layout(); });
+    }
     window.TG_LAYOUT = layout;
 })();
 </script>

@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [2.9] -- 2026-10-01
+
+### Fixed
+- **Android: right-hand cropping.** Panels now fit the *visual* viewport, so the UI scales
+  to whatever is actually visible even if the WebView ignores the viewport meta.
+- setInitialScale(0) -> setInitialScale(100); a zero initial scale broke the starting
+  zoom on some WebView versions.
+- Dialog list width capped at min(372px, 100%) so it cannot exceed the screen.
+
 ## [2.8] -- 2026-10-01
 
 ### Fixed
