@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [3.0] -- 2026-10-01
+
+### Changed
+- **Android: video message (circle) button restored in the chat input panel** -- it had been
+  hidden on Android by mistake in 2.9.
+- Call and video call buttons live in the chat header; the main screen keeps only add contact,
+  stars and settings.
+
 ## [2.9] -- 2026-10-01
 
 ### Fixed
