@@ -584,8 +584,14 @@
         html.android-app .chat-preview, html.android-app .chat-row-item .chat-preview { font-size: .78rem; }
         html.android-app .message-bubble { max-width: 86%; padding: 7px 11px; border-radius: 16px; font-size: .87rem; line-height: 1.4; }
         html.android-app .message-reply-quote { font-size: .68rem; padding: 3px 6px; }
-        html.android-app .input-panel { padding: 6px 8px calc(6px + var(--safe-bottom)); gap: 4px; }
-        html.android-app .input-panel input[type="text"] { padding: 9px 14px; font-size: .88rem; border-radius: 20px; }
+        html.android-app .input-panel { padding: 6px 8px calc(6px + var(--safe-bottom)); gap: 4px; flex-wrap: nowrap; }
+        html.android-app .input-panel input[type="text"] { padding: 9px 14px; font-size: .88rem; border-radius: 20px; flex: 1 1 auto; min-width: 0; }
+        html.android-app .input-panel .icon-action-btn { flex: 0 0 34px; width: 34px; height: 34px; font-size: 1.1rem; }
+        html.android-app #sttBtn, html.android-app #circleRecordBtn { display: none !important; }
+        html.android-app .dialog-title-wrap { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+        html.android-app .dialog-title, html.android-app .dialog-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        html.android-app .message-bubble { overflow-wrap: break-word; word-break: break-word; }
+        html.android-app .chat-row-item > * { min-width: 0; }
         html.android-app .send-main-btn { width: 36px; height: 36px; min-width: 36px; }
         html.android-app .attach-btn, html.android-app .emoji-btn { width: 34px; height: 34px; }
         html.android-app .chats-fab-btn { width: 46px; height: 46px; bottom: 14px; right: 12px; font-size: 1.3rem; }
@@ -1041,30 +1047,6 @@
 <script src="app.js"></script>
 <script src="desktop.js"></script>
 <script>
-/* Временная диагностика: реальные числа вьюпорта в WebView */
-(function () {
-    if (!/TailGramAndroid/.test(navigator.userAgent)) return;
-    var el = document.createElement('div');
-    el.id = 'tgDiag';
-    document.body.appendChild(el);
-    function txt() {
-        var vv = window.visualViewport;
-        return '<b>TailGram DIAG</b>\n' +
-            'innerWidth=' + window.innerWidth + ' clientWidth=' + document.documentElement.clientWidth +
-            ' docScrollW=' + document.documentElement.scrollWidth + '\n' +
-            'screen=' + screen.width + 'x' + screen.height + ' dpr=' + window.devicePixelRatio +
-            ' vv.scale=' + (vv ? vv.scale : '?') + ' vv.w=' + (vv ? Math.round(vv.width) : '?') + '\n' +
-            'html.class="' + document.documentElement.className + '" mm719=' +
-            window.matchMedia('(max-width: 719px)').matches + '\n' +
-            'bridge=' + (typeof window.AndroidNative) + ' flag=' + (!!window.TAILGRAM_ANDROID);
-    }
-    function show() { el.innerHTML = txt(); el.style.display = 'block'; }
-    setTimeout(show, 500);
-    setTimeout(function () { el.style.display = 'none'; }, 15000);
-    window.TG_DIAG = show;
-})();
-</script>
-<script>
 /* Раскладка экрана на Android: задаём панели размеры напрямую, чтобы не зависеть
    от поддержки CSS (inset, flex-basis) в конкретной версии WebView. */
 (function () {
@@ -1139,59 +1121,6 @@
     window.addEventListener('resize', function () { if (forced) layout(); });
     window.addEventListener('orientationchange', function () { setTimeout(hook, 250); });
     window.TG_LAYOUT = layout;
-})();
-</script>
-<script>
-/* Номер сборки прямо в приложении: видно, какая версия реально запущена */
-(function () {
-    if (!/TailGramAndroid/.test(navigator.userAgent)) return;
-    var b = document.createElement('div');
-    b.style.cssText = 'position:fixed;right:4px;bottom:4px;z-index:2147483647;background:rgba(0,0,0,.6);' +
-        'color:#7CFC7C;font:10px ui-monospace,monospace;padding:2px 5px;border-radius:6px;pointer-events:none';
-    b.textContent = 'TG 2.6';
-    var put = function () { if (document.body) document.body.appendChild(b); };
-    if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
-})();
-</script>
-<script>
-/* Масштаб интерфейса прямо в приложении: "-" меньше, "+" больше.
-   Нужно, чтобы подогнать размер под конкретный телефон без новой сборки. */
-(function () {
-    if (!/TailGramAndroid/.test(navigator.userAgent)) return;
-    var MIN = 0.72, MAX = 1.30, STEP = 0.06;
-    var z = 1;
-    try { z = parseFloat(localStorage.getItem('tg_zoom') || '1') || 1; } catch (e) { z = 1; }
-    z = Math.min(MAX, Math.max(MIN, z));
-    var box, label;
-    function build() {
-        box = document.createElement('div');
-        box.id = 'tgZoom';
-        box.style.cssText = 'position:fixed;right:6px;bottom:26px;z-index:2147483647;display:flex;align-items:center;gap:6px;' +
-            'background:rgba(0,0,0,.62);border-radius:20px;padding:4px 8px;';
-        var minus = document.createElement('button');
-        minus.textContent = '\u2212';
-        var plus = document.createElement('button');
-        plus.textContent = '+';
-        label = document.createElement('span');
-        var st = 'background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;width:26px;height:26px;' +
-            'border-radius:13px;font-size:15px;line-height:1;padding:0;';
-        minus.style.cssText = st; plus.style.cssText = st;
-        label.style.cssText = 'color:#fff;font:11px ui-monospace,monospace;min-width:34px;text-align:center';
-        box.appendChild(minus); box.appendChild(label); box.appendChild(plus);
-        document.body.appendChild(box);
-        minus.onclick = function () { setZoom(z - STEP); };
-        plus.onclick = function () { setZoom(z + STEP); };
-    }
-    function setZoom(v) {
-        z = Math.min(MAX, Math.max(MIN, Math.round(v * 100) / 100));
-        try { localStorage.setItem('tg_zoom', String(z)); } catch (e) {}
-        document.documentElement.style.zoom = z;
-        if (label) label.textContent = Math.round(z * 100) + '%';
-        if (window.TG_LAYOUT) window.TG_LAYOUT();
-    }
-    window.TG_SET_ZOOM = setZoom;
-    var put = function () { if (document.body && !box) { build(); setZoom(z); } };
-    if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
 })();
 </script>
 </body>

@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [2.7] -- 2026-10-01
+
+### Changed
+- **Android: layout built for the phone instead of patched.** Input field widened from 186 to 272 px
+  (removed speech-to-text and video-circle buttons), compact paddings/avatars/headers,
+  truncated long names, long messages wrap by word.
+- **Removed all temporary debug UI:** startup diagnostics overlay, build badge and the
+  in-app zoom buttons. Nothing appears or disappears on its own now.
+
 ## [2.6] -- 2026-10-01
 
 ### Changed
