@@ -1064,12 +1064,29 @@
         dlg.style.setProperty('transition', 'transform .3s cubic-bezier(.2,.8,.2,1)', 'important');
         list.style.setProperty('transition', 'transform .3s cubic-bezier(.2,.8,.2,1)', 'important');
         var on = root.classList.contains('chat-active');
-        dlg.style.setProperty('transform', on ? 'translateX(0)' : 'translateX(' + vw + 'px)', 'important');
-        list.style.setProperty('transform', on ? 'translateX(-' + Math.round(vw * 0.22) + 'px)' : 'translateX(0)', 'important');
-        if (on) { list.style.setProperty('filter', 'brightness(.45)', 'important'); list.style.setProperty('pointer-events', 'none', 'important'); }
-        else { list.style.setProperty('filter', 'none', 'important'); list.style.setProperty('pointer-events', 'auto', 'important'); }
+        if (on) {
+            /* Жёсткий режим: чат перекрывает весь экран, список полностью скрыт.
+               Пишем напрямую в cssText, чтобы никакие стили не могли это отменить. */
+            dlg.style.cssText = 'position:absolute !important;top:0 !important;right:0 !important;bottom:0 !important;left:0 !important;' +
+                'width:' + vw + 'px !important;height:' + vh + 'px !important;margin:0 !important;padding:0 !important;' +
+                'transform:none !important;transition:none !important;display:block !important;visibility:visible !important;' +
+                'opacity:1 !important;z-index:2147483646 !important;overflow:hidden !important;background:var(--tg-dialog-bg,#0b1220) !important';
+            list.style.cssText = 'position:absolute !important;top:0 !important;left:0 !important;' +
+                'width:' + vw + 'px !important;height:' + vh + 'px !important;margin:0 !important;padding:0 !important;' +
+                'transform:translateX(-100%) !important;transition:none !important;display:block !important;' +
+                'visibility:hidden !important;opacity:0 !important;pointer-events:none !important;z-index:1 !important';
+        } else {
+            dlg.style.cssText = 'position:absolute !important;top:0 !important;left:0 !important;right:auto !important;bottom:auto !important;' +
+                'width:' + vw + 'px !important;height:' + vh + 'px !important;margin:0 !important;padding:0 !important;' +
+                'transform:translateX(' + vw + 'px) !important;transition:none !important;display:block !important;' +
+                'visibility:hidden !important;opacity:0 !important;z-index:1 !important';
+            list.style.cssText = 'position:absolute !important;top:0 !important;left:0 !important;right:auto !important;bottom:auto !important;' +
+                'width:' + vw + 'px !important;height:' + vh + 'px !important;margin:0 !important;padding:0 !important;' +
+                'transform:translateX(0) !important;transition:none !important;display:block !important;' +
+                'visibility:visible !important;opacity:1 !important;pointer-events:auto !important;z-index:2 !important';
+        }
         var inner = root.querySelector('.dialog-inner');
-        if (inner) box(inner, vw, vh);
+        if (inner) { inner.style.setProperty('position', 'absolute', 'important'); inner.style.setProperty('top', '0', 'important'); inner.style.setProperty('left', '0', 'important'); inner.style.setProperty('width', vw + 'px', 'important'); inner.style.setProperty('height', vh + 'px', 'important'); inner.style.setProperty('display', 'flex', 'important'); }
         var empty = root.querySelector('.dialog-empty');
         if (empty) empty.style.setProperty('display', 'none', 'important');
         var back = root.querySelector('.back-btn');
@@ -1090,6 +1107,18 @@
     window.addEventListener('resize', function () { if (forced) layout(); });
     window.addEventListener('orientationchange', function () { setTimeout(hook, 250); });
     window.TG_LAYOUT = layout;
+})();
+</script>
+<script>
+/* Номер сборки прямо в приложении: видно, какая версия реально запущена */
+(function () {
+    if (!/TailGramAndroid/.test(navigator.userAgent)) return;
+    var b = document.createElement('div');
+    b.style.cssText = 'position:fixed;right:4px;bottom:4px;z-index:2147483647;background:rgba(0,0,0,.6);' +
+        'color:#7CFC7C;font:10px ui-monospace,monospace;padding:2px 5px;border-radius:6px;pointer-events:none';
+    b.textContent = 'TG 2.4';
+    var put = function () { if (document.body) document.body.appendChild(b); };
+    if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
 })();
 </script>
 </body>
