@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [2.5] -- 2026-10-01
+
+###  changed
+- **Android: interface sized for phone.** Layout width 480 px instead of 412, base font 15 px,
+  smaller avatars/stories/headers/bubbles/input panel, so everything fits on screen.
+- Navigation (full-screen chat + back arrow) unchanged.
+
 ## [2.4] — 2026-10-01
 
 ### Исправлено
