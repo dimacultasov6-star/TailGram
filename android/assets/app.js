@@ -560,6 +560,7 @@
                     this.saveStorage();
                     this.sound.playReceive();
                     if (navigator.vibrate) navigator.vibrate(60);
+                    this.pushNotify(sender, data.payload);
                     if (data.payload.gift) {
                         this.confetti.fire();
                         this.sound.playGift();
@@ -1863,8 +1864,34 @@
         }
 
         // --- NAVIGATION & RENDERING ---
+        /** Уведомление Android о новом сообщении (как в Telegram). */
+        pushNotify(sender, payload) {
+            try {
+                if (!window.AndroidNative || !window.AndroidNative.notifyMessage) return;
+                if (window.TAILGRAM_ANDROID === false) return;
+                const p = payload || {};
+                const contact = this.db.contacts[sender] || {};
+                const nick = contact.nick || sender;
+                let body = '';
+                if (p.gift) body = '🎁 Подарок';
+                else if (p.voice) body = '🎤 Голосовое сообщение';
+                else if (p.video || p.circle) body = '🎥 Видеосообщение';
+                else if (p.image) body = '🖼 Изображение';
+                else if (p.doc || p.file) body = '📎 Файл';
+                else body = p.text || '';
+                body = String(body).replace(/\s+/g, ' ').trim().slice(0, 140);
+                if (p.text && (p.voice || p.video || p.circle)) {
+                    body = String(p.text).replace(/\s+/g, ' ').trim().slice(0, 140);
+                }
+                if (!body) body = 'Новое сообщение';
+                const title = contact.nick ? contact.nick : sender;
+                window.AndroidNative.notifyMessage(sender, title, body);
+            } catch (e) { }
+        }
+
         openChat(peerId, title) {
             this.activeChat = peerId;
+            try { if (window.AndroidNative && window.AndroidNative.clearUnread) window.AndroidNative.clearUnread(); } catch (e) { }
             document.getElementById('appRoot').classList.add('chat-active');
             this.updateActiveChatInfo();
             this.updatePinnedBanner();

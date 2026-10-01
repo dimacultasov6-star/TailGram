@@ -3,6 +3,8 @@ package com.tailgram.app;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -27,8 +29,19 @@ import java.util.Map;
 
 public class MainActivity extends Activity {
 
+    public static final String EXTRA_PEER_ID = "peer_id";
+
     private static final int REQ_PERMS = 1001;
     private static final int REQ_WEB_PERMS = 1002;
+    private static final int REQ_NOTIFY = 1004;
+
+    /** true, когда приложение на экране (тогда уведомления не показываем). */
+    private static volatile boolean inForeground = true;
+    private static volatile int unread = 0;
+
+    static int unreadCount() {
+        return unread;
+    }
 
     private WebView web;
     private ValueCallback<Uri[]> filePathCallback;
@@ -38,6 +51,16 @@ public class MainActivity extends Activity {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.CAMERA
     };
+
+    /** Запускает/обновляет foreground-сервис, чтобы P2P-соединение жило в фоне. */
+    static void keepAlive(Context ctx) {
+        try {
+            Notifier.ensureChannels(ctx);
+            Intent i = new Intent(ctx, TailGramService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) ctx.startForegroundService(i);
+            else ctx.startService(i);
+        } catch (Exception ignored) { }
+    }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -85,7 +108,7 @@ public class MainActivity extends Activity {
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
         s.setGeolocationEnabled(true);
-        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.0");
+        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.1");
 
         WebView.setWebContentsDebuggingEnabled(false);
 
@@ -144,7 +167,45 @@ public class MainActivity extends Activity {
         web.addJavascriptInterface(new NativeBridge(), "AndroidNative");
 
         requestRuntimePermissions();
+        Notifier.ensureChannels(this);
+        keepAlive(this);
+        requestNotificationPermission();
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < 33) return;
+        try {
+            if (checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{ "android.permission.POST_NOTIFICATIONS" }, REQ_NOTIFY);
+            }
+        } catch (Exception ignored) { }
+    }
+
+    /** Тап по уведомлению: открываем нужный чат. */
+    private void handleIntent(android.content.Intent intent) {
+        if (intent == null) return;
+        final String peer = intent.getStringExtra(EXTRA_PEER_ID);
+        intent.removeExtra(EXTRA_PEER_ID);
+        if (peer == null || peer.length() == 0) return;
+        if (web == null) return;
+        web.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String js = "(function(){try{if(window.AppManager)AppManager.openChat("
+                            + "'" + peer.replace("'", "") + "');}catch(e){}})();";
+                    web.evaluateJavascript(js, null);
+                } catch (Exception ignored) { }
+            }
+        }, 700);
+    }
+
+    @Override
+    protected void onNewIntent(android.content.Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
     }
 
     private void injectNativeBridge() {
@@ -229,16 +290,24 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        inForeground = false;
+        /* WebView намеренно НЕ останавливаем: P2P-соединение и приём сообщений
+           должны продолжаться в фоне, иначе уведомления не придут. */
         if (web != null) {
-            try { web.evaluateJavascript("try{window.AppManager&&AppManager.pauseAll&&AppManager.pauseAll();}catch(e){}", null); }
+            try { web.evaluateJavascript("try{window.document&&(document.title=document.title);}catch(e){}", null); }
             catch (Exception ignored) { }
-            web.onPause();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        inForeground = true;
+        unread = 0;
+        Notifier.clearMessages(this);
+        Notifier.showConnection(this, 0);
+        keepAlive(this);
+        handleIntent(getIntent());
         if (web != null) web.onResume();
     }
 
@@ -296,6 +365,28 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String platform() {
             return "android";
+        }
+
+        /** Вызывается из JS при получении нового сообщения. */
+        @JavascriptInterface
+        public void notifyMessage(final String peerId, final String title, final String body) {
+            if (inForeground) return;
+            unread++;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Notifier.showMessage(MainActivity.this, peerId, title, body);
+                    Notifier.showConnection(MainActivity.this, unread);
+                }
+            });
+        }
+
+        /** Счётчик непрочитанных сбрасывается при открытии чата. */
+        @JavascriptInterface
+        public void clearUnread() {
+            unread = 0;
+            Notifier.clearMessages(MainActivity.this);
+            Notifier.showConnection(MainActivity.this, 0);
         }
     }
 }

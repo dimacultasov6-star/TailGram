@@ -5,6 +5,17 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [3.1] -- 2026-10-01
+
+### Added
+- **Android: background message notifications.** A dataSync foreground service keeps the
+  process and the P2P connection alive, so messages still arrive while the app is closed.
+  High-importance notification channel with sound and vibration, per-message notifications,
+  tap opens the right chat, unread counter in the ongoing notification.
+- Voice / video / gift / image / file messages get proper notification labels.
+- POST_NOTIFICATIONS requested on Android 13+; notifications clear when a chat is opened.
+- WebView is no longer paused in onPause so incoming data keeps flowing.
+
 ## [3.0] -- 2026-10-01
 
 ### Changed

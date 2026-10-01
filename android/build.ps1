@@ -16,8 +16,8 @@ $PROJ = $PSScriptRoot
 $WORK = Join-Path $env:TEMP "tg_apk_build"
 $OUT  = Join-Path $WORK "build"
 
-$VER_CODE = 12
-$VER_NAME = "3.0"
+$VER_CODE = 13
+$VER_NAME = "3.1"
 
 if (Test-Path $WORK) { Remove-Item $WORK -Recurse -Force }
 New-Item -ItemType Directory -Path $OUT | Out-Null
@@ -37,7 +37,7 @@ Step "2/6 aapt2 link" {
 New-Item -ItemType Directory -Path "$OUT\classes" | Out-Null
 Step "3/6 javac" {
     & "$JDK\javac.exe" --release 8 -nowarn -encoding UTF-8 -classpath "$SDKJAR" `
-        -d "$OUT\classes" (Join-Path $WORK "java\com\tailgram\app\MainActivity.java")
+        -d "$OUT\classes" @(Get-ChildItem (Join-Path $WORK "java") -Recurse -Filter *.java | ForEach-Object { $_.FullName })
 }
 if (-not (Get-ChildItem "$OUT\classes" -Recurse -Filter *.class)) { throw "javac produced no class files" }
 
