@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [3.3] -- 2026-10-01
+
+### Fixed
+- **Android: notifications never reached the shade.** They used the adaptive
+  ic_launcher icon, which Android rejects for notifications, so posts failed silently.
+  Added a dedicated monochrome ic_stat_tg drawable.
+- The notification self-test now reports whether notifications are blocked by the system
+  and opens the app notification settings; the app warns at startup if they are disabled.
+
 ## [3.2] -- 2026-10-01
 
 ### Added

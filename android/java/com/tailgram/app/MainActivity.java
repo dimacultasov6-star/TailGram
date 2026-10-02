@@ -108,7 +108,7 @@ public class MainActivity extends Activity {
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
         s.setGeolocationEnabled(true);
-        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.2");
+        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.3");
 
         WebView.setWebContentsDebuggingEnabled(false);
 
@@ -170,7 +170,27 @@ public class MainActivity extends Activity {
         Notifier.ensureChannels(this);
         keepAlive(this);
         requestNotificationPermission();
+        if (!Notifier.notificationsAllowed(this)) {
+            Toast.makeText(this, "Включи уведомления для TailGram — иначе сообщения не будут приходить",
+                    Toast.LENGTH_LONG).show();
+        }
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    /** Открывает экран настроек уведомлений приложения. */
+    private void openNotificationSettings() {
+        try {
+            Intent i = new Intent();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                i.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+                i.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
+            } else {
+                i.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+                i.setData(Uri.parse("package:" + getPackageName()));
+            }
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        } catch (Exception ignored) { }
     }
 
     private void requestNotificationPermission() {
@@ -387,7 +407,17 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    boolean allowed = Notifier.notificationsAllowed(MainActivity.this);
                     Notifier.showMessage(MainActivity.this, "tg_test", "TailGram", "Тест: уведомления работают");
+                    String msg;
+                    if (!allowed) {
+                        msg = "Уведомления ЗАПРЕЩЕНЫ в системе. Разреши их в настройках.";
+                    } else {
+                        msg = "Уведомление отправлено. Если его нет в шторке — проверь канал "
+                                + "«Сообщения»: долгий тап по уведомлению → настройки.";
+                    }
+                    Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+                    if (!allowed) openNotificationSettings();
                 }
             });
         }
