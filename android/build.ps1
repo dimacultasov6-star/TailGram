@@ -17,7 +17,7 @@ $WORK = Join-Path $env:TEMP "tg_apk_build"
 $OUT  = Join-Path $WORK "build"
 
 $VER_CODE = 15
-$VER_NAME = "3.3"
+$VER_NAME = "3.4"
 
 if (Test-Path $WORK) { Remove-Item $WORK -Recurse -Force }
 New-Item -ItemType Directory -Path $OUT | Out-Null

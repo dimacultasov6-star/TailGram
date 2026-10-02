@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 проект версионируется по [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [3.4] -- 2026-10-02
+
+### Fixed
+- **Messages never arrived over P2P.** The WebRTC config only had STUN servers, which
+  cannot traverse carrier-grade NAT or blocked UDP, so the data channel never opened.
+  Added public TURN relays plus automatic reconnect with a visible warning.
+
 ## [3.3] -- 2026-10-01
 
 ### Fixed

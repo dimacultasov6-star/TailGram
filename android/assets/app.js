@@ -413,7 +413,13 @@
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
+                        { urls: 'stun:global.stun.twilio.com:3478' },
+                        { urls: 'stun:stun.metered.ca:80' },
+                        /* TURN обязателен: без него мобильные операторы (особенно CGNAT)
+                           не дают соединиться напрямую, и сообщения не доходят. */
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -518,7 +524,16 @@
 
             conn.on('data', (data) => this.handleData(peerId, data));
             conn.on('close', () => { this.clearTypingState(peerId); delete this.connections[peerId]; if (this.activeChat === peerId) this.updateChatHeaderStatus(false); this.renderChats(); });
-            conn.on('error', () => { this.clearTypingState(peerId); delete this.connections[peerId]; if (this.activeChat === peerId) this.updateChatHeaderStatus(false); this.renderChats(); });
+            conn.on('error', () => {
+                this.clearTypingState(peerId);
+                delete this.connections[peerId];
+                if (this.activeChat === peerId) this.updateChatHeaderStatus(false);
+                this.renderChats();
+                /* Прямое соединение не удалось -- сообщения не уйдут. Пробуем ещё раз. */
+                const nick = (this.db.contacts[peerId] || {}).nick || peerId;
+                this.showToast('⚠️ Не удалось соединиться с ' + nick + ' — нет прямого канала. Переподключаю...');
+                setTimeout(() => { try { this.connectToPeer(peerId); } catch (e) { } }, 6000);
+            });
         }
 
         handleData(sender, data) {

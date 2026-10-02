@@ -108,7 +108,7 @@ public class MainActivity extends Activity {
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
         s.setGeolocationEnabled(true);
-        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.3");
+        s.setUserAgentString(s.getUserAgentString() + " TailGramAndroid/3.4");
 
         WebView.setWebContentsDebuggingEnabled(false);
 
